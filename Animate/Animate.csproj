@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Emgu.CV" Version="4.11.0.5746" />
+    <PackageReference Include="Emgu.CV.Bitmap" Version="4.11.0.5746" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.11.0.5746" />
+  </ItemGroup>
+
+</Project>

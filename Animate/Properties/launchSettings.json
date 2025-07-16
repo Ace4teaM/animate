@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Animate": {
+      "commandName": "Project",
+      "commandLineArgs": "sprites.bmp",
+      "workingDirectory": "C:\\Users\\aceteam\\source\\repos\\animate\\Animate"
+    }
+  }
+}
