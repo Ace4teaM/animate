@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Net.Cache;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
@@ -56,6 +57,8 @@ namespace Animate
     {
         private BitmapImage spriteSheet;
         private bool spriteSheetTransparency;
+        private bool spriteChanged = false;
+        private string? spritePath;
         FileSystemWatcher? spriteSheetSystemWatcher;
         public ObservableCollection<Frame> Frames { get; } = new ObservableCollection<Frame>();
         private System.Windows.Point startPoint;
@@ -64,9 +67,9 @@ namespace Animate
 
         private int currentFrameIndex = 0;
         private DispatcherTimer animationTimer;
+        private DispatcherTimer reloadTimer;
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
 
         protected void OnPropertyChange(string propertyName)
         {
@@ -115,8 +118,9 @@ namespace Animate
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = this;
             SetupAnimationTimer();
+            SetupReloadTimer();
+            this.DataContext = this;
         }
 
         /// <summary>
@@ -376,6 +380,22 @@ namespace Animate
             OnPropertyChange(nameof(FrameDuration));
         }
 
+        private void SetupReloadTimer()
+        {
+            reloadTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(1000)
+            };
+            reloadTimer.Tick += (s, e) =>
+            {
+                if(spriteChanged)
+                {
+                    this.Dispatcher.Invoke(new Action(() => { ReLoadImage(); }));
+                }
+            };
+            reloadTimer.Start();
+        }
+
         private void LoadImage_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
@@ -390,7 +410,16 @@ namespace Animate
 
         internal void LoadImage(string path)
         {
-            spriteSheet = new BitmapImage(new Uri(path));
+            spriteChanged = false;
+            spritePath = path;
+            spriteSheet = new BitmapImage();
+            spriteSheet.BeginInit();
+            var mem = new MemoryStream();
+            using(FileStream file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                file.CopyTo(mem);
+            spriteSheet.StreamSource = mem;
+            spriteSheet.CacheOption = BitmapCacheOption.OnLoad;
+            spriteSheet.EndInit();
             spriteSheetTransparency = spriteSheet.HasActualTransparency();
 
             MainImage.Source = spriteSheet;
@@ -401,13 +430,50 @@ namespace Animate
 
             ClearFrames(); // Optionnel : garde ou efface les frames existants
 
-            /*spriteSheetSystemWatcher = new FileSystemWatcher(path);
-            spriteSheetSystemWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            spriteSheetSystemWatcher.Changed += SpriteSheetSystemWatcher_Changed;*/
+            var a = Path.GetDirectoryName(path);
+            var b = Path.GetFileName(path);
+            spriteSheetSystemWatcher = new FileSystemWatcher(Path.GetDirectoryName(path), Path.GetFileName(path));
+            spriteSheetSystemWatcher.BeginInit();
+            spriteSheetSystemWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess;
+            spriteSheetSystemWatcher.Changed += SpriteSheetSystemWatcher_Changed;
+            spriteSheetSystemWatcher.EnableRaisingEvents = true;
+            spriteSheetSystemWatcher.EndInit();
+        }
+
+        internal void ReLoadImage()
+        {
+            try
+            {
+                var mem = spriteSheet.StreamSource as MemoryStream;
+                mem.Seek(0, SeekOrigin.Begin);
+                using (FileStream file = File.Open(spritePath, FileMode.Open, FileAccess.Read))
+                {
+                    file.CopyTo(mem);
+                    mem.SetLength(file.Length);
+                }
+
+                spriteSheet = new BitmapImage();
+                spriteSheet.BeginInit();
+                spriteSheet.StreamSource = mem;
+                spriteSheet.CacheOption = BitmapCacheOption.OnLoad;
+                spriteSheet.EndInit();
+
+                MainImage.Source = spriteSheet;
+                MainImage.Width = spriteSheet.PixelWidth;
+                MainImage.Height = spriteSheet.PixelHeight;
+                ImageCanvas.Width = spriteSheet.PixelWidth;
+                ImageCanvas.Height = spriteSheet.PixelHeight;
+
+                spriteChanged = false;
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void SpriteSheetSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
+            spriteChanged = true;
         }
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -493,6 +559,15 @@ namespace Animate
             }
         }
 
+        private void RemoveFrames(IEnumerable<Frame> frames)
+        {
+            var _frames = frames.ToArray();
+            currentFrameIndex = 0;
+            foreach (var frame in _frames)
+                Frames.Remove(frame);
+            HideOrigins(_frames);
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var wd = Directory.GetCurrentDirectory();
@@ -503,6 +578,7 @@ namespace Animate
                 LoadImage(path);
             }
         }
+
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -591,6 +667,11 @@ namespace Animate
                     MessageBox.Show(ex.Message);
                 }
             }
+        }
+
+        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveFrames(frameList.SelectedItems.OfType<Frame>());
         }
     }
 }

@@ -30,7 +30,7 @@ public static class ImageConverter
             BitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
             encoder.Save(stream);
-
+            
             // Revenir au début du stream
             stream.Position = 0;
 
