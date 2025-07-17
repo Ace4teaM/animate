@@ -25,11 +25,14 @@
                     <Setter Property="Width" Value="100"></Setter>
                     <Setter Property="Height" Value="30"></Setter>
                 </Style>
+                <Style TargetType="ToggleButton">
+                    <Setter Property="Width" Value="100"></Setter>
+                    <Setter Property="Height" Value="30"></Setter>
+                </Style>
             </StackPanel.Resources>
             <Button Content="Load..." Click="LoadImage_Click" Margin="5"/>
             <Button Content="Clear Frames" Click="ClearFrames_Click" Margin="5"/>
-            <Button Content="Show outlines" Click="ShowOrigins_Click" Margin="5"/>
-            <Button Content="Hide outlines" Click="HideOrigins_Click" Margin="5"/>
+            <ToggleButton Content="Outlines" Click="ShowOrigins_Click" Margin="5"/>
             <Button Content="Export..." Click="ExportImages_Click" Margin="5"/>
         </StackPanel>
 

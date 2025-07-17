@@ -10,6 +10,7 @@ using System.Net.Cache;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -590,12 +591,14 @@ namespace Animate
 
         private void ShowOrigins_Click(object sender, RoutedEventArgs e)
         {
-            ShowOrigins(Frames);
-        }
-
-        private void HideOrigins_Click(object sender, RoutedEventArgs e)
-        {
-            HideOrigins(Frames);
+            if (((ToggleButton)sender).IsChecked == true)
+            {
+                ShowOrigins(Frames);
+            }
+            else
+            {
+                HideOrigins(Frames);
+            }
         }
 
         private void AdjusteOrigins_Click(object sender, RoutedEventArgs e)
