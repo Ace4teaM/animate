@@ -5,41 +5,43 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Animate"
         mc:Ignorable="d"
-        Title="Animate!" Height="600" Width="1024"
+        Title="Animate !" Height="600" Width="1024"
         Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100*"></ColumnDefinition>
+            <ColumnDefinition Width="551*"></ColumnDefinition>
+            <ColumnDefinition Width="273*"/>
             <ColumnDefinition Width="200"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        
+
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="10">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="10,10,10,10" Grid.ColumnSpan="2">
             <StackPanel.Resources>
-                <Style TargetType="Button">
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                     <Setter Property="Width" Value="100"></Setter>
                     <Setter Property="Height" Value="30"></Setter>
                 </Style>
-                <Style TargetType="ToggleButton">
+                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
                     <Setter Property="Width" Value="100"></Setter>
                     <Setter Property="Height" Value="30"></Setter>
                 </Style>
             </StackPanel.Resources>
             <Button Content="Load..." Click="LoadImage_Click" Margin="5"/>
             <Button Content="Clear Frames" Click="ClearFrames_Click" Margin="5"/>
-            <ToggleButton Content="Outlines" Click="ShowOrigins_Click" Margin="5"/>
             <Button Content="Export..." Click="ExportImages_Click" Margin="5"/>
+            <ToggleButton IsChecked="True" Content="Outlines" Click="ShowOrigins_Click" Margin="5"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontFamily="Verdana">Animation Stack</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontFamily="Verdana">Frames Stack</TextBlock>
 
         <!-- Canvas + Image -->
-        <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+        <ScrollViewer Grid.Row="2" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
             <Canvas Name="ImageCanvas" Background="BlueViolet" MouseLeftButtonDown="Canvas_MouseDown"
                     MouseMove="Canvas_MouseMove" MouseLeftButtonUp="Canvas_MouseUp">
                 <Border BorderThickness="2" BorderBrush="Black">
@@ -47,21 +49,32 @@
                 </Border>
             </Canvas>
         </ScrollViewer>
-        
+
         <!-- Canvas + Image -->
-        <DockPanel Grid.Row="1" Grid.Column="1">
+        <DockPanel Grid.Row="2" Grid.Column="2">
             <Border DockPanel.Dock="Bottom" BorderThickness="0" BorderBrush="Black" Padding="8">
                 <DockPanel>
-                    <Label DockPanel.Dock="Left" VerticalAlignment="Center">Frame Duration</Label>
+                    <TextBlock Width="60" TextWrapping="Wrap" TextAlignment="Center" DockPanel.Dock="Left" VerticalAlignment="Center">Frame Duration</TextBlock>
                     <TextBox DockPanel.Dock="Right" Width="50" Text="{Binding FrameDuration, Mode=TwoWay}"></TextBox>
                     <Slider Minimum="100" Maximum="1000" Value="{Binding FrameDurationValue}" VerticalAlignment="Center"></Slider>
                 </DockPanel>
             </Border>
-            <Border DockPanel.Dock="Bottom" Height="200" BorderThickness="1" BorderBrush="Black" Margin="6">
+            <Border DockPanel.Dock="Bottom" Height="200" BorderThickness="1" BorderBrush="Black" Margin="6" Background="White">
                 <Image Name="AnimedImage"/>
             </Border>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Click="Prev_Click">
+                    <TextBlock Width="30" TextAlignment="Center" Text="◁" FontSize="30"></TextBlock>
+                </Button>
+                <Button Click="Pause_Click">
+                    <TextBlock Width="30" TextAlignment="Center" Text="{Binding PlaySymbol}" FontSize="30"></TextBlock>
+                </Button>
+                <Button Click="Next_Click">
+                    <TextBlock Width="30" TextAlignment="Center" Text="▷" FontSize="30"></TextBlock>
+                </Button>
+            </StackPanel>
             <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden" Margin="6">
-                <ListView x:Name="frameList" ItemsSource="{Binding Frames}" SelectionChanged="ListView_SelectionChanged">
+                <ListView x:Name="frameList" ItemsSource="{Binding Frames}" SelectedItem="{Binding SelectedFrame, Mode=TwoWay}" PreviewMouseDown="ListView_MouseDown">
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Supprimer" Click="DeleteItem_Click"></MenuItem>

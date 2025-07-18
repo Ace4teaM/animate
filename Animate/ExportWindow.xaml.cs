@@ -12,7 +12,7 @@ namespace Animate
         private int imageHeight;
         private int imageWidth;
 
-        public int ImageHeight { get => imageHeight; set{ imageHeight = value; PropertyChanged?.Invoke(value, new PropertyChangedEventArgs(nameof(AdjustedImageHeight))); } }
+        public int ImageHeight { get => imageHeight; set { imageHeight = value; PropertyChanged?.Invoke(value, new PropertyChangedEventArgs(nameof(AdjustedImageHeight))); } }
         public int ImageWidth { get => imageWidth; set { imageWidth = value; PropertyChanged?.Invoke(value, new PropertyChangedEventArgs(nameof(AdjustedImageWidth))); } }
         public bool? AdjustSize { get; set; }
         public int AdjustedImageHeight { get { return (int)BitOperations.RoundUpToPowerOf2((uint)ImageHeight); } }

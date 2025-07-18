@@ -1,9 +1,4 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
-using Microsoft.Win32;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Cache;
@@ -15,6 +10,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using Microsoft.Win32;
 
 namespace Animate
 {
@@ -56,19 +56,19 @@ namespace Animate
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private BitmapImage spriteSheet;
-        private bool spriteSheetTransparency;
+        private BitmapImage? spriteSheet;
+        private bool spriteSheetTransparency = false;
         private bool spriteChanged = false;
         private string? spritePath;
         FileSystemWatcher? spriteSheetSystemWatcher;
         public ObservableCollection<Frame> Frames { get; } = new ObservableCollection<Frame>();
         private System.Windows.Point startPoint;
-        private System.Windows.Shapes.Rectangle selectionRect;
+        private System.Windows.Shapes.Rectangle? selectionRect;
         private bool isDrawing = false;
 
         private int currentFrameIndex = 0;
-        private DispatcherTimer animationTimer;
-        private DispatcherTimer reloadTimer;
+        private DispatcherTimer? animationTimer;
+        private DispatcherTimer? reloadTimer;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -81,24 +81,27 @@ namespace Animate
         {
             get
             {
-                return animationTimer.Interval.TotalMilliseconds.ToString(@"0ms");
+                return (animationTimer != null) ? animationTimer.Interval.TotalMilliseconds.ToString(@"0ms") : String.Empty;
             }
             set
             {
-                double dinterval = 0;
-                if (value.Contains(".") && double.TryParse(value, out dinterval) && dinterval >= 100 && dinterval <= 1)
+                if (animationTimer != null)
                 {
-                    animationTimer.Interval = TimeSpan.FromSeconds(dinterval);
-                    OnPropertyChange(nameof(FrameDurationValue));
-                    return;
-                }
+                    double dinterval = 0;
+                    if (value.Contains(".") && double.TryParse(value, out dinterval) && dinterval >= 100 && dinterval <= 1)
+                    {
+                        animationTimer.Interval = TimeSpan.FromSeconds(dinterval);
+                        OnPropertyChange(nameof(FrameDurationValue));
+                        return;
+                    }
 
-                int interval = 0;
-                if (int.TryParse(value, out interval) && interval >= 100 && interval <= 1000)
-                {
-                    animationTimer.Interval = TimeSpan.FromMilliseconds(interval);
-                    OnPropertyChange(nameof(FrameDurationValue));
-                    return;
+                    int interval = 0;
+                    if (int.TryParse(value, out interval) && interval >= 100 && interval <= 1000)
+                    {
+                        animationTimer.Interval = TimeSpan.FromMilliseconds(interval);
+                        OnPropertyChange(nameof(FrameDurationValue));
+                        return;
+                    }
                 }
             }
         }
@@ -107,13 +110,50 @@ namespace Animate
         {
             get
             {
-                return animationTimer.Interval.TotalMilliseconds;
+                return (animationTimer != null) ? animationTimer.Interval.TotalMilliseconds : 0.0;
             }
             set
             {
-                animationTimer.Interval = TimeSpan.FromMilliseconds(value);
-                OnPropertyChange(nameof(FrameDuration));
+                if (animationTimer != null)
+                {
+                    animationTimer.Interval = TimeSpan.FromMilliseconds(value);
+                    OnPropertyChange(nameof(FrameDuration));
+                }
             }
+        }
+
+        public Frame? SelectedFrame
+        {
+            get
+            {
+                if (Frames.Count == 0 || spriteSheet == null) return null;
+
+                return Frames[currentFrameIndex];
+            }
+            set
+            {
+                if (value == null)
+                    currentFrameIndex = 0;
+                else
+                    currentFrameIndex = Frames.IndexOf(value);
+
+                SetFrame(currentFrameIndex);
+            }
+        }
+
+        internal void SetFrame(int frameIndex)
+        {
+            if (frameIndex >= Frames.Count || frameIndex < 0 || spriteSheet == null) return;
+
+            currentFrameIndex = frameIndex;
+
+            var frame = Frames[currentFrameIndex];
+            var cropped = new CroppedBitmap(spriteSheet, frame.rect);
+            AnimedImage.Source = cropped;
+
+            OnPropertyChange(nameof(PlaySymbol));
+
+            OnPropertyChange("SelectedFrame");
         }
 
         public MainWindow()
@@ -129,6 +169,9 @@ namespace Animate
         /// </summary>
         internal void AdjustOrigins(IEnumerable<Frame> frames)
         {
+            if (spriteSheet == null)
+                return;
+
             // 1. Charger l’image
             using Mat src = spriteSheet.ToBitmap().ToMat();
 
@@ -178,6 +221,9 @@ namespace Animate
         /// </summary>
         internal void AdjustBoundFromSolidBackground(IEnumerable<Frame> frames)
         {
+            if (spriteSheet == null)
+                return;
+
             // 1. Charger l’image
             using Mat src = spriteSheet.ToBitmap().ToMat();
 
@@ -239,6 +285,9 @@ namespace Animate
         /// </summary>
         internal void AdjustBound(IEnumerable<Frame> frames)
         {
+            if (spriteSheet == null)
+                return;
+
             // 1. Charger l’image
             using Mat src = spriteSheet.ToBitmap().ToMat();
 
@@ -376,6 +425,8 @@ namespace Animate
                 AnimedImage.Source = cropped;
 
                 currentFrameIndex = (currentFrameIndex + 1) % Frames.Count;
+
+                OnPropertyChange("SelectedFrame");
             };
             animationTimer.Start();
             OnPropertyChange(nameof(FrameDuration));
@@ -389,7 +440,7 @@ namespace Animate
             };
             reloadTimer.Tick += (s, e) =>
             {
-                if(spriteChanged)
+                if (spriteChanged)
                 {
                     this.Dispatcher.Invoke(new Action(() => { ReLoadImage(); }));
                 }
@@ -411,12 +462,15 @@ namespace Animate
 
         internal void LoadImage(string path)
         {
+            if (path == null)
+                return;
+
             spriteChanged = false;
             spritePath = path;
             spriteSheet = new BitmapImage();
             spriteSheet.BeginInit();
             var mem = new MemoryStream();
-            using(FileStream file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (FileStream file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 file.CopyTo(mem);
             spriteSheet.StreamSource = mem;
             spriteSheet.CacheOption = BitmapCacheOption.OnLoad;
@@ -431,8 +485,6 @@ namespace Animate
 
             ClearFrames(); // Optionnel : garde ou efface les frames existants
 
-            var a = Path.GetDirectoryName(path);
-            var b = Path.GetFileName(path);
             spriteSheetSystemWatcher = new FileSystemWatcher(Path.GetDirectoryName(path), Path.GetFileName(path));
             spriteSheetSystemWatcher.BeginInit();
             spriteSheetSystemWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess;
@@ -443,9 +495,15 @@ namespace Animate
 
         internal void ReLoadImage()
         {
+            if (spriteSheet == null)
+                return;
+
             try
             {
                 var mem = spriteSheet.StreamSource as MemoryStream;
+                if (mem == null)
+                    mem = new MemoryStream();
+
                 mem.Seek(0, SeekOrigin.Begin);
                 using (FileStream file = File.Open(spritePath, FileMode.Open, FileAccess.Read))
                 {
@@ -533,8 +591,8 @@ namespace Animate
                 Frames.Add(frame);
 
                 //if (spriteSheetTransparency == false)//pas d'alpha
-                    AdjustBoundFromSolidBackground(new[] { frame });
-               // else
+                AdjustBoundFromSolidBackground(new[] { frame });
+                // else
                 //    AdjustBound(new[] { frame });
 
                 ShowOrigins(new[] { frame });
@@ -581,12 +639,11 @@ namespace Animate
         }
 
 
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ListView_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var item = ((ListView)sender).SelectedItem as Frame;
-            if (item != null)
-            {
-            }
+            var element = e.MouseDevice.DirectlyOver;
+            StopFrame();
+            e.Handled = false;
         }
 
         private void ShowOrigins_Click(object sender, RoutedEventArgs e)
@@ -619,8 +676,8 @@ namespace Animate
                 return;
             }
             var wnd = new ExportWindow();
-            wnd.ImageWidth = Frames.Select(p=>p.rect.Width).Max();
-            wnd.ImageHeight = Frames.Select(p=>p.rect.Height).Max();
+            wnd.ImageWidth = Frames.Select(p => p.rect.Width).Max();
+            wnd.ImageHeight = Frames.Select(p => p.rect.Height).Max();
             wnd.Owner = this;
             wnd.WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
@@ -675,6 +732,78 @@ namespace Animate
         private void DeleteItem_Click(object sender, RoutedEventArgs e)
         {
             RemoveFrames(frameList.SelectedItems.OfType<Frame>());
+        }
+
+         public string PlaySymbol
+         {
+             get
+             {
+                 return animationTimer?.IsEnabled == true ? "||" : "▶︎";
+             }
+         }
+
+        private void Next_Click(object sender, RoutedEventArgs e)
+        {
+            NextFrame();
+        }
+
+        private void Pause_Click(object sender, RoutedEventArgs e)
+        {
+            PauseFrame();
+        }
+
+        private void Prev_Click(object sender, RoutedEventArgs e)
+        {
+            PrevFrame();
+        }
+
+        private void NextFrame()
+        {
+            animationTimer?.Stop();
+
+            if (Frames.Count == 0 || spriteSheet == null) return;
+
+            if (currentFrameIndex + 1 >= Frames.Count)
+                currentFrameIndex = 0;
+            else
+                currentFrameIndex++;
+
+            SetFrame(currentFrameIndex);
+        }
+
+        private void PauseFrame()
+        {
+            if (animationTimer?.IsEnabled == true)
+                animationTimer?.Stop();
+            else
+                animationTimer?.Start();
+
+            OnPropertyChange(nameof(PlaySymbol));
+
+            OnPropertyChange("SelectedFrame");
+        }
+
+        private void StopFrame()
+        {
+            animationTimer?.Stop();
+
+            OnPropertyChange(nameof(PlaySymbol));
+
+            OnPropertyChange("SelectedFrame");
+        }
+
+        private void PrevFrame()
+        {
+            animationTimer?.Stop();
+
+            if (Frames.Count == 0 || spriteSheet == null) return;
+
+            if (currentFrameIndex - 1 < 0)
+                currentFrameIndex = Frames.Count - 1;
+            else
+                currentFrameIndex--;
+
+            SetFrame(currentFrameIndex);
         }
     }
 }

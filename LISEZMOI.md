@@ -11,6 +11,12 @@ Animate! est compatible avec les fichiers BMP, JPG ou PNG.
 
 La fonction **Export** permet de préparer les sprites avec une taille fixe et sans fond pour importer dans vos projets de développement (ex: Unity).
 
+## Thème UI
+
+Animate implémente les styles Windows 11 Clair/Sombre configurable depuis le panneau de contrôle Windows.
+
+![](Theme.PNG)
+
 ## Licence MIT
 
 Animate! est totalement libre de droits alors n'hésitez pas à l'utiliser !
