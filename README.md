@@ -1,4 +1,7 @@
 # Animate!
+
+[Lisez Moi (Français)](LISEZMOI.md)
+
 Animate! is a tool that allows you to animate your on-screen drawings from an image file.
 
 Easy to use thanks to a complex interface and numerous features; the goal is to allow you to quickly visualize your animations and then export the cropped images without the background.
@@ -18,3 +21,5 @@ Animate! is completely royalty-free, so feel free to use it!
 Want to improve the project?
 
 ​	Contact me by email at: thomas.auguey@hotmail.com
+
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub-blue?logo=github)](https://github.com/sponsors/Ace4TeaM)

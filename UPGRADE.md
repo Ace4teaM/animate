@@ -1,12 +1,16 @@
 # Upgrade Animate!
 
+[Mise à niveau (Français)](MISEANIVEAU.md)
+
 Want to get new features and support my work? Then make a donation and receive the latest version of Animate immediately!
+
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub-blue?logo=github)](https://github.com/sponsors/Ace4TeaM)
 
 ## Update Contents
 
 **What are the additional features?**
 
-* Manage multiple animations on the same sheet using the tab system
+* This is the first version, more features will come later
 
 ## FAQ
 
@@ -22,3 +26,6 @@ Whatever you want (with a modest minimum), the goal is to support my work accord
 
 Yes, that's the principle! You support my work over time for a modest contribution. No subscription, no fixed price, no commitment, no regrets! If you don't like the features or don't need them, you can keep your current version or wait until the next update.
 
+**Can I request my own features?**
+
+Of course, feel free to contact me by email: thomas.auguey@hotmail.com.

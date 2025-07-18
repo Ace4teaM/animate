@@ -1,4 +1,6 @@
 # Animate!
+[Read Me (English)](README.md)
+
 Animate! est un outil qui permet d'animer vos dessins à l'écran à partir d'un fichier image.
 
 Pas de prise de tête avec une interface complexe et des tonnes de fonctionnalités, le but est de vous permettre de visualiser au plus vite vos animations puis d'exporter les images recadrées et sans arrière plan.
@@ -24,3 +26,5 @@ Animate! est totalement libre de droits alors n'hésitez pas à l'utiliser !
 Vous voulez améliorer le projet ?
 
 ​	Contactez-moi par mail à l'adresse suivante : thomas.auguey@hotmail.com
+
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub-blue?logo=github)](https://github.com/sponsors/Ace4TeaM)
