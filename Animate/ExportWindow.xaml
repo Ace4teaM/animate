@@ -6,30 +6,30 @@
         xmlns:local="clr-namespace:Animate"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
-        Title="Export" >
+        Title="Export images..." >
     <Window.Resources>
         <local:IntToStringConverter x:Key="IntToStringConverter"/>
     </Window.Resources>
     <DockPanel Margin="6">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <TextBlock  VerticalAlignment="Center" Text="Largeur Image" Width="120"></TextBlock>
+            <TextBlock  VerticalAlignment="Center" Text="Image Width" Width="120"></TextBlock>
             <TextBox  VerticalAlignment="Center" Text="{Binding ImageWidth, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" Width="90"></TextBox>
             <TextBlock  VerticalAlignment="Center" Text="px" Width="20" TextAlignment="Right"></TextBlock>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center" Text="Hauteur Image" Width="120"></TextBlock>
+            <TextBlock VerticalAlignment="Center" Text="Image Height" Width="120"></TextBlock>
             <TextBox  VerticalAlignment="Center" Text="{Binding ImageHeight, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" Width="90"></TextBox>
             <TextBlock  VerticalAlignment="Center" Text="px" Width="20" TextAlignment="Right"></TextBlock>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center" Text="Ajuster la taille" Width="120"></TextBlock>
+            <TextBlock VerticalAlignment="Center" Text="Size Adjust" Width="120"></TextBlock>
             <CheckBox VerticalAlignment="Center" IsChecked="{Binding AdjustSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
             <TextBlock VerticalAlignment="Center" Text="{Binding AdjustedImageWidth}" Margin="10,0,0,0"></TextBlock>
             <TextBlock VerticalAlignment="Center" Text="x" Margin="10,0,0,0"></TextBlock>
             <TextBlock VerticalAlignment="Center" Text="{Binding AdjustedImageHeight}" Margin="10,0,0,0"></TextBlock>
         </StackPanel>
         <Border DockPanel.Dock="Bottom">
-            <Button Width="120" HorizontalAlignment="Right" Click="Button_Click">Exporter</Button>
+            <Button Width="120" HorizontalAlignment="Right" Click="Button_Click">Export</Button>
         </Border>
         <Label></Label>
     </DockPanel>

@@ -24,11 +24,11 @@
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="10,10,10,10" Grid.ColumnSpan="2">
             <StackPanel.Resources>
                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                    <Setter Property="Width" Value="100"></Setter>
+                    <Setter Property="Width" Value="120"></Setter>
                     <Setter Property="Height" Value="30"></Setter>
                 </Style>
                 <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                    <Setter Property="Width" Value="100"></Setter>
+                    <Setter Property="Width" Value="120"></Setter>
                     <Setter Property="Height" Value="30"></Setter>
                 </Style>
             </StackPanel.Resources>
@@ -53,10 +53,13 @@
         <!-- Canvas + Image -->
         <DockPanel Grid.Row="2" Grid.Column="2">
             <Border DockPanel.Dock="Bottom" BorderThickness="0" BorderBrush="Black" Padding="8">
+                <Slider Minimum="100" Maximum="1000" Value="{Binding FrameDurationValue}" VerticalAlignment="Center"></Slider>
+            </Border>
+            <Border DockPanel.Dock="Bottom" BorderThickness="0" BorderBrush="Black" Padding="8">
                 <DockPanel>
                     <TextBlock Width="60" TextWrapping="Wrap" TextAlignment="Center" DockPanel.Dock="Left" VerticalAlignment="Center">Frame Duration</TextBlock>
-                    <TextBox DockPanel.Dock="Right" Width="50" Text="{Binding FrameDuration, Mode=TwoWay}"></TextBox>
-                    <Slider Minimum="100" Maximum="1000" Value="{Binding FrameDurationValue}" VerticalAlignment="Center"></Slider>
+                    <TextBox DockPanel.Dock="Right" Width="90" Text="{Binding FrameDuration, Mode=TwoWay}"></TextBox>
+                    <Label></Label>
                 </DockPanel>
             </Border>
             <Border DockPanel.Dock="Bottom" Height="200" BorderThickness="1" BorderBrush="Black" Margin="6" Background="White">
