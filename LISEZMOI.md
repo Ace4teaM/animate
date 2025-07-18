@@ -19,6 +19,10 @@ Animate implémente les styles Windows 11 Clair/Sombre configurable depuis le pa
 
 ![](Theme.PNG)
 
+## Release
+
+https://github.com/Ace4teaM/animate/releases
+
 ## Licence MIT
 
 Animate! est totalement libre de droits alors n'hésitez pas à l'utiliser !
