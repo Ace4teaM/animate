@@ -6,7 +6,20 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <Title>Animate!</Title>
+    <Authors>Thomas AUGUEY</Authors>
+    <Description>Animate your sketches</Description>
+    <PackageProjectUrl>https://github.com/Ace4teaM/animate</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ace4teaM/animate</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Emgu.CV" Version="4.11.0.5746" />
