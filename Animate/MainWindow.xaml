@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Animate"
+        WindowStyle="None"
         mc:Ignorable="d"
         Title="Animate !" Height="600" Width="1024"
         Loaded="Window_Loaded">
@@ -19,6 +20,27 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        
+        <!-- Barre de titre -->
+        <DockPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Height="40" Background="Gray" MouseLeftButtonDown="DockPanel_MouseLeftButtonDown">
+            <DockPanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="5,0,5,0"></Setter>
+                    <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                    <Setter Property="Width" Value="30"></Setter>
+                    <Setter Property="Height" Value="30"></Setter>
+                    <Setter Property="FontSize" Value="20"></Setter>
+                    <Setter Property="FontStyle" Value="Normal"></Setter>
+                </Style>
+            </DockPanel.Resources>
+            <TextBlock DockPanel.Dock="Left" Text="Animate !" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"  FontFamily="Verdana"></TextBlock>
+            <Button DockPanel.Dock="Right" Click="CloseButton_Click">X</Button>
+            <Button DockPanel.Dock="Right" Click="MaximizeButton_Click">o</Button>
+            <Button DockPanel.Dock="Right" Click="MinimizeButton_Click">_</Button>
+            <Button DockPanel.Dock="Right" Click="UpgradeButton_Click" Width="auto" FontSize="16" Padding="6,0,6,0" Background="Orange" BorderThickness="3" BorderBrush="YellowGreen">Donate and Upgrade</Button>
+            <Grid></Grid>
+        </DockPanel>
 
         <!-- Toolbar -->
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="10,10,10,10" Grid.ColumnSpan="2">
