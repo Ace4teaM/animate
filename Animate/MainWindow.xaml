@@ -35,7 +35,11 @@
                 </Style>
             </DockPanel.Resources>
             <Image DockPanel.Dock="Left" RenderOptions.BitmapScalingMode="HighQuality" Source="pack://application:,,,/Animate;component/Icon.ico" Margin="10,0,0,0" Width="32" Height="32"/>
-            <TextBlock DockPanel.Dock="Left" Text="Animate !" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0" FontFamily="Comic Sans MS" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"></TextBlock>
+            <TextBlock DockPanel.Dock="Left" Text="Animate !" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0" FontWeight="DemiBold" FontFamily="Comic Sans MS" Foreground="#92CDD9"></TextBlock>
+            <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" FontSize="10" Margin="10,10,0,0" FontFamily="Verdana" Foreground="#C5E6FF" FontStyle="Italic">
+               <Run Text="v"/>          
+               <Run Text="{Binding CurrentVersion, Mode=OneTime}" />
+            </TextBlock>
             <Button DockPanel.Dock="Right" Click="CloseButton_Click">✕</Button>
             <Button DockPanel.Dock="Right" Click="MaximizeButton_Click">🗖</Button>
             <Button DockPanel.Dock="Right" Click="MinimizeButton_Click">🗕</Button>

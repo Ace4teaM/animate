@@ -1,8 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using Microsoft.Win32;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Cache;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,11 +17,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
-using Microsoft.Win32;
 
 namespace Animate
 {
@@ -105,6 +106,14 @@ namespace Animate
                         return;
                     }
                 }
+            }
+        }
+
+        public Version? CurrentVersion
+        {
+            get
+            {
+                return Assembly.GetEntryAssembly()?.GetName().Version;
             }
         }
 
