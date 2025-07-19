@@ -17,6 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Xml.Linq;
 
 namespace Animate
 {
@@ -63,7 +64,7 @@ namespace Animate
         private bool spriteChanged = false;
         private string? spritePath;
         FileSystemWatcher? spriteSheetSystemWatcher;
-        public ObservableCollection<Frame> Frames { get; } = new ObservableCollection<Frame>();
+        public ObservableCollection<Frame> Frames { get; } = [];
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle? selectionRect;
         private bool isDrawing = false;
@@ -90,16 +91,14 @@ namespace Animate
             {
                 if (animationTimer != null)
                 {
-                    double dinterval = 0;
-                    if (value.Contains(".") && double.TryParse(value, out dinterval) && dinterval >= 100 && dinterval <= 1)
+                    if (value.Contains('.') && double.TryParse(value, out double dinterval) && dinterval >= 100 && dinterval <= 1)
                     {
                         animationTimer.Interval = TimeSpan.FromSeconds(dinterval);
                         OnPropertyChange(nameof(FrameDurationValue));
                         return;
                     }
 
-                    int interval = 0;
-                    if (int.TryParse(value, out interval) && interval >= 100 && interval <= 1000)
+                    if (int.TryParse(value, out int interval) && interval >= 100 && interval <= 1000)
                     {
                         animationTimer.Interval = TimeSpan.FromMilliseconds(interval);
                         OnPropertyChange(nameof(FrameDurationValue));
@@ -109,7 +108,7 @@ namespace Animate
             }
         }
 
-        public Version? CurrentVersion
+        public static Version? CurrentVersion
         {
             get
             {
@@ -164,7 +163,7 @@ namespace Animate
 
             OnPropertyChange(nameof(PlaySymbol));
 
-            OnPropertyChange("SelectedFrame");
+            OnPropertyChange(nameof(SelectedFrame));
         }
 
         public MainWindow()
@@ -189,20 +188,20 @@ namespace Animate
             foreach (var frame in frames)
             {
                 // 1. Définir la zone d’intérêt (ROI)
-                using Mat img = new Mat(src, new System.Drawing.Rectangle(frame.rect.X, frame.rect.Y, frame.rect.Width, frame.rect.Height));
+                using var img = new Mat(src, new System.Drawing.Rectangle(frame.rect.X, frame.rect.Y, frame.rect.Width, frame.rect.Height));
 
                 // 2. Extraire le canal alpha si transparent (RGBA)
-                Mat alpha = new Mat();
+                var alpha = new Mat();
                 if (img.NumberOfChannels == 4)
                 {
-                    VectorOfMat channels = new VectorOfMat();
+                    var channels = new VectorOfMat();
                     CvInvoke.Split(img, channels);
                     alpha = channels[3]; // Canal alpha
                 }
                 else
                 {
                     // Si pas de transparence, créer un masque par couleur (ex: fond blanc)
-                    using Mat mask = new Mat();
+                    using var mask = new Mat();
                     CvInvoke.InRange(img, new ScalarArray(new MCvScalar(250, 250, 250)), new ScalarArray(new MCvScalar(255, 255, 255)), mask);
                     CvInvoke.BitwiseNot(mask, alpha); // Inverser pour avoir l'objet
                 }
@@ -241,18 +240,18 @@ namespace Animate
             foreach (var frame in frames)
             {
                 // 1. Définir la zone d’intérêt (ROI)
-                using Mat img = new Mat(src, new System.Drawing.Rectangle(frame.rect.X, frame.rect.Y, frame.rect.Width, frame.rect.Height));
+                using var img = new Mat(src, new System.Drawing.Rectangle(frame.rect.X, frame.rect.Y, frame.rect.Width, frame.rect.Height));
 
                 // 2. Convertir en HSV (plus stable pour détecter une couleur unie)
-                Mat imgHsv = new Mat();
+                var imgHsv = new Mat();
                 CvInvoke.CvtColor(img, imgHsv, ColorConversion.Bgr2Hsv);
 
                 // 3. Définir la couleur du fond (ex: coin supérieur gauche)
                 var bgColor = imgHsv.ToImage<Hsv, byte>()[0, 0];//utiliser un échantillon ?
 
                 // 4. Définir une tolérance autour de la couleur du fond
-                Hsv lower = new Hsv(bgColor.Hue - 10, Math.Max(bgColor.Satuation - 40, 0), Math.Max(bgColor.Value - 40, 0));
-                Hsv upper = new Hsv(bgColor.Hue + 10, Math.Min(bgColor.Satuation + 40, 255), Math.Min(bgColor.Value + 40, 255));
+                var lower = new Hsv(bgColor.Hue - 10, Math.Max(bgColor.Satuation - 40, 0), Math.Max(bgColor.Value - 40, 0));
+                var upper = new Hsv(bgColor.Hue + 10, Math.Min(bgColor.Satuation + 40, 255), Math.Min(bgColor.Value + 40, 255));
 
                 // 5. Créer un masque du fond
                 Image<Hsv, byte> imgHsvImage = imgHsv.ToImage<Hsv, byte>();
@@ -266,7 +265,7 @@ namespace Animate
                 CvInvoke.Erode(mask, mask, null, new System.Drawing.Point(-1, -1), 1, BorderType.Default, new MCvScalar());
                 CvInvoke.Dilate(mask, mask, null, new System.Drawing.Point(-1, -1), 2, BorderType.Default, new MCvScalar());
 
-                VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+                var contours = new VectorOfVectorOfPoint();
                 CvInvoke.FindContours(mask, contours, null, RetrType.External, ChainApproxMethod.ChainApproxSimple);
 
                 // Calcul de la bounding box globale
@@ -305,18 +304,18 @@ namespace Animate
             foreach (var frame in frames)
             {
                 // 1. Définir la zone d’intérêt (ROI)
-                using Mat img = new Mat(src, new System.Drawing.Rectangle(frame.rect.X, frame.rect.Y, frame.rect.Width, frame.rect.Height));
+                using var img = new Mat(src, new System.Drawing.Rectangle(frame.rect.X, frame.rect.Y, frame.rect.Width, frame.rect.Height));
 
                 // Convertir en niveaux de gris
-                Mat gray = new Mat();
+                var gray = new Mat();
                 CvInvoke.CvtColor(img, gray, ColorConversion.Bgr2Gray);
 
                 // Appliquer un seuillage automatique
-                Mat thresh = new Mat();
+                var thresh = new Mat();
                 CvInvoke.Threshold(gray, thresh, 0, 255, ThresholdType.Binary | ThresholdType.Otsu);
 
                 // Trouver les contours dans le ROI
-                VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+                var contours = new VectorOfVectorOfPoint();
                 CvInvoke.FindContours(thresh, contours, null, RetrType.External, ChainApproxMethod.ChainApproxSimple);
 
                 // Calcul de la bounding box globale
@@ -351,7 +350,7 @@ namespace Animate
                 {
                     Stroke = Brushes.Red,
                     StrokeThickness = 2,
-                    StrokeDashArray = new DoubleCollection { 2 },
+                    StrokeDashArray = [2],
                     Width = frame.rect.Width,
                     Height = frame.rect.Height,
                     Tag = frame
@@ -364,7 +363,7 @@ namespace Animate
                 {
                     Stroke = Brushes.Red,
                     StrokeThickness = 2,
-                    StrokeDashArray = new DoubleCollection { 2 },
+                    StrokeDashArray = [2],
                     Width = 7,
                     Height = 7,
                     Margin = new Thickness(-3, -3, 0, 0),
@@ -437,7 +436,7 @@ namespace Animate
 
                 currentFrameIndex = (currentFrameIndex + 1) % Frames.Count;
 
-                OnPropertyChange("SelectedFrame");
+                OnPropertyChange(nameof(SelectedFrame));
             };
             animationTimer.Start();
             OnPropertyChange(nameof(FrameDuration));
@@ -461,8 +460,10 @@ namespace Animate
 
         private void LoadImage_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "Image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp";
+            var dlg = new OpenFileDialog
+            {
+                Filter = "Image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp"
+            };
 
             if (dlg.ShowDialog() == true)
             {
@@ -474,6 +475,12 @@ namespace Animate
         internal void LoadImage(string path)
         {
             if (path == null)
+                return;
+
+            var dirname = Path.GetDirectoryName(path);
+            var filename = Path.GetFileName(path);
+
+            if(dirname == null || filename == null)
                 return;
 
             spriteChanged = false;
@@ -496,7 +503,7 @@ namespace Animate
 
             ClearFrames(); // Optionnel : garde ou efface les frames existants
 
-            spriteSheetSystemWatcher = new FileSystemWatcher(Path.GetDirectoryName(path), Path.GetFileName(path));
+            spriteSheetSystemWatcher = new FileSystemWatcher(dirname, filename);
             spriteSheetSystemWatcher.BeginInit();
             spriteSheetSystemWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess;
             spriteSheetSystemWatcher.Changed += SpriteSheetSystemWatcher_Changed;
@@ -506,12 +513,12 @@ namespace Animate
 
         internal void ReLoadImage()
         {
-            if (spriteSheet == null)
+            if (spriteSheet == null || spritePath == null)
                 return;
 
             try
             {
-                var mem = spriteSheet.StreamSource as MemoryStream;
+                MemoryStream? mem = spriteSheet.StreamSource as MemoryStream;
                 if (mem == null)
                     mem = new MemoryStream();
 
@@ -559,7 +566,7 @@ namespace Animate
                 {
                     Stroke = Brushes.Red,
                     StrokeThickness = 2,
-                    StrokeDashArray = new DoubleCollection { 2 },
+                    StrokeDashArray = [2],
                     Width = 0,
                     Height = 0
                 };
@@ -627,11 +634,11 @@ namespace Animate
                     Frames.Add(frame);
 
                     //if (spriteSheetTransparency == false)//pas d'alpha
-                    AdjustBoundFromSolidBackground(new[] { frame });
+                    AdjustBoundFromSolidBackground([frame]);
                     // else
                     //    AdjustBound(new[] { frame });
 
-                    ShowOrigins(new[] { frame });
+                    ShowOrigins([frame]);
                 }
 
                 ImageCanvas.Children.Remove(selectionRect);
@@ -674,7 +681,6 @@ namespace Animate
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var wd = Directory.GetCurrentDirectory();
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
@@ -686,7 +692,6 @@ namespace Animate
 
         private void ListView_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var element = e.MouseDevice.DirectlyOver;
             StopFrame();
             e.Handled = false;
         }
@@ -720,11 +725,13 @@ namespace Animate
                 MessageBox.Show("Aucune image chargée ou aucun sprite défini.");
                 return;
             }
-            var wnd = new ExportWindow();
-            wnd.ImageWidth = Frames.Select(p => p.rect.Width).Max();
-            wnd.ImageHeight = Frames.Select(p => p.rect.Height).Max();
-            wnd.Owner = this;
-            wnd.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            var wnd = new ExportWindow
+            {
+                ImageWidth = Frames.Select(p => p.rect.Width).Max(),
+                ImageHeight = Frames.Select(p => p.rect.Height).Max(),
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
 
             if (wnd.ShowDialog() == true)
             {
@@ -825,7 +832,7 @@ namespace Animate
 
             OnPropertyChange(nameof(PlaySymbol));
 
-            OnPropertyChange("SelectedFrame");
+            OnPropertyChange(nameof(SelectedFrame));
         }
 
         private void StopFrame()
@@ -834,7 +841,7 @@ namespace Animate
 
             OnPropertyChange(nameof(PlaySymbol));
 
-            OnPropertyChange("SelectedFrame");
+            OnPropertyChange(nameof(SelectedFrame));
         }
 
         private void PrevFrame()

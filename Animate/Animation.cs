@@ -38,7 +38,7 @@ namespace Animate
             }
         }
 
-        public CroppedBitmap GetCurrentFrame()
+        public CroppedBitmap? GetCurrentFrame()
         {
             if (SpriteSheet == null) return null;
 
