@@ -122,7 +122,13 @@
                 </Button>
             </StackPanel>
             <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden" Margin="6">
-                <ListView x:Name="frameList" ItemsSource="{Binding Frames}" SelectedItem="{Binding SelectedFrame, Mode=TwoWay}" PreviewMouseDown="ListView_MouseDown">
+                <ListView x:Name="frameList"
+                          ItemsSource="{Binding Frames}"
+                          SelectedItem="{Binding SelectedFrame, Mode=TwoWay}" 
+                          PreviewMouseDown="ListView_MouseDown" 
+                          MouseMove="ListView_MouseMove"
+                          AllowDrop="True"
+                          Drop="ListView_Drop">
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Supprimer" Click="DeleteItem_Click"></MenuItem>

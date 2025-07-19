@@ -692,8 +692,64 @@ namespace Animate
 
         private void ListView_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            startPoint = e.GetPosition(null);
             StopFrame();
             e.Handled = false;
+        }
+
+
+        private void ListView_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point mousePos = e.GetPosition(null);
+            System.Windows.Vector diff = startPoint - mousePos;
+
+            if (e.LeftButton == MouseButtonState.Pressed &&
+                (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
+            {
+                var listView = sender as ListView;
+                var listViewItem = ((DependencyObject)e.OriginalSource).FindAncestor<ListViewItem>();
+
+                if (listViewItem == null) return;
+
+                var item = (Frame)listView.ItemContainerGenerator.ItemFromContainer(listViewItem);
+                if (item != null)
+                {
+                    DragDrop.DoDragDrop(listViewItem, item, DragDropEffects.Move);
+                }
+            }
+        }
+
+        private void ListView_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(Frame)))
+            {
+                var droppedData = e.Data.GetData(typeof(Frame)) as Frame;
+                var listView = sender as ListView;
+                var point = e.GetPosition(listView);
+                var target = listView?.GetItemAt<Frame>(point);
+
+                if (droppedData == null || target == null || droppedData == target || !Frames.Contains(droppedData))
+                    return;
+
+                int removedIdx = Frames.IndexOf(droppedData);
+                int targetIdx = Frames.IndexOf(target);
+
+                if (removedIdx < targetIdx)
+                {
+                    Frames.Insert(targetIdx + 1, droppedData);
+                    Frames.RemoveAt(removedIdx);
+                }
+                else
+                {
+                    int remIdx = removedIdx + 1;
+                    if (Frames.Count + 1 > remIdx)
+                    {
+                        Frames.Insert(targetIdx, droppedData);
+                        Frames.RemoveAt(remIdx);
+                    }
+                }
+            }
         }
 
         private void ShowOrigins_Click(object sender, RoutedEventArgs e)
