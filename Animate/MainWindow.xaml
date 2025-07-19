@@ -98,7 +98,7 @@
         <!-- Canvas + Image -->
         <DockPanel Grid.Row="2" Grid.Column="2">
             <Border DockPanel.Dock="Bottom" BorderThickness="0" BorderBrush="Black" Padding="8">
-                <Slider Minimum="100" Maximum="1000" Value="{Binding FrameDurationValue}" VerticalAlignment="Center"></Slider>
+                <Slider Minimum="50" Maximum="1000" Value="{Binding FrameDurationValue}" VerticalAlignment="Center"></Slider>
             </Border>
             <Border DockPanel.Dock="Bottom" BorderThickness="0" BorderBrush="Black" Padding="8">
                 <DockPanel>
