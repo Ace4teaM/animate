@@ -12,7 +12,12 @@
     <PackageProjectUrl>https://github.com/Ace4teaM/animate</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Ace4teaM/animate</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE">

@@ -34,7 +34,8 @@
                     <Setter Property="FontStyle" Value="Normal"></Setter>
                 </Style>
             </DockPanel.Resources>
-            <TextBlock DockPanel.Dock="Left" Text="Animate !" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"  FontFamily="Verdana"></TextBlock>
+            <Image DockPanel.Dock="Left" RenderOptions.BitmapScalingMode="HighQuality" Source="pack://application:,,,/Animate;component/Icon.ico" Margin="10,0,0,0" Width="32" Height="32"/>
+            <TextBlock DockPanel.Dock="Left" Text="Animate !" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0" FontFamily="Comic Sans MS" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"></TextBlock>
             <Button DockPanel.Dock="Right" Click="CloseButton_Click">X</Button>
             <Button DockPanel.Dock="Right" Click="MaximizeButton_Click">o</Button>
             <Button DockPanel.Dock="Right" Click="MinimizeButton_Click">_</Button>

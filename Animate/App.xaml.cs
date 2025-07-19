@@ -1,6 +1,11 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Animate
 {
