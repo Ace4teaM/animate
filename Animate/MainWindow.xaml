@@ -59,14 +59,32 @@
             <Button Content="Clear Frames" Click="ClearFrames_Click" Margin="5"/>
             <Button Content="Export..." Click="ExportImages_Click" Margin="5"/>
             <ToggleButton IsChecked="True" Content="Outlines" Click="ShowOrigins_Click" Margin="5"/>
+            <Border BorderThickness="0" BorderBrush="Black" Padding="8">
+                <Slider x:Name="ZoomSlider" Minimum="0.1" Maximum="3" TickFrequency="0.1" Value="{Binding ZoomFactor, Mode=TwoWay}" VerticalAlignment="Center"></Slider>
+            </Border>
+            <Button Content="Center" Click="Center_Click" Margin="5"/>
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontFamily="Verdana">Frames Stack</TextBlock>
 
         <!-- Canvas + Image -->
-        <ScrollViewer Grid.Row="2" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
-            <Canvas Name="ImageCanvas" Background="BlueViolet" MouseLeftButtonDown="Canvas_MouseDown"
-                    MouseMove="Canvas_MouseMove" MouseLeftButtonUp="Canvas_MouseUp">
+        <ScrollViewer x:Name="canvas" Grid.Row="2" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
+            <Canvas Name="ImageCanvas" Background="BlueViolet" 
+                    PreviewMouseDown="Canvas_MouseDown"
+                    PreviewMouseMove="Canvas_MouseMove" 
+                    PreviewMouseUp="Canvas_MouseUp"
+                    PreviewMouseWheel="Canvas_MouseWheel"
+                    >
+                <Canvas.LayoutTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="ZoomTransform" ScaleX="{Binding ZoomFactor}" ScaleY="{Binding ZoomFactor}" />
+                    </TransformGroup>
+                </Canvas.LayoutTransform>
+                <Canvas.RenderTransform>
+                    <TransformGroup>
+                        <TranslateTransform x:Name="PanTransform" X="0" Y="0" />
+                    </TransformGroup>
+                </Canvas.RenderTransform>
                 <Border BorderThickness="2" BorderBrush="Black">
                     <Image Name="MainImage"/>
                 </Border>

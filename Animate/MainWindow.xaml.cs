@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Net.Cache;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -65,6 +66,7 @@ namespace Animate
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle? selectionRect;
         private bool isDrawing = false;
+        private bool isPanning = false;
 
         private int currentFrameIndex = 0;
         private DispatcherTimer? animationTimer;
@@ -539,66 +541,100 @@ namespace Animate
         {
             if (spriteSheet == null) return;
 
-            isDrawing = true;
-            startPoint = e.GetPosition(ImageCanvas);
-
-            selectionRect = new System.Windows.Shapes.Rectangle
+            if (e.LeftButton == MouseButtonState.Pressed)
             {
-                Stroke = Brushes.Red,
-                StrokeThickness = 2,
-                StrokeDashArray = new DoubleCollection { 2 },
-                Width = 0,
-                Height = 0
-            };
-            Canvas.SetLeft(selectionRect, startPoint.X);
-            Canvas.SetTop(selectionRect, startPoint.Y);
-            ImageCanvas.Children.Add(selectionRect);
+                isDrawing = true;
+                startPoint = e.GetPosition(ImageCanvas);
+
+                selectionRect = new System.Windows.Shapes.Rectangle
+                {
+                    Stroke = Brushes.Red,
+                    StrokeThickness = 2,
+                    StrokeDashArray = new DoubleCollection { 2 },
+                    Width = 0,
+                    Height = 0
+                };
+                Canvas.SetLeft(selectionRect, startPoint.X);
+                Canvas.SetTop(selectionRect, startPoint.Y);
+                ImageCanvas.Children.Add(selectionRect);
+                MainImage.CaptureMouse();
+            }
+            else if(e.MiddleButton == MouseButtonState.Pressed)
+            {
+                isPanning = true;
+                startPoint = e.GetPosition(this);
+                MainImage.CaptureMouse();
+            }
+
+            e.Handled = true;
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!isDrawing || selectionRect == null) return;
+            if (isDrawing && selectionRect != null)
+            {
+                Point pos = e.GetPosition(ImageCanvas);
 
-            Point pos = e.GetPosition(ImageCanvas);
+                double x = Math.Min(pos.X, startPoint.X);
+                double y = Math.Min(pos.Y, startPoint.Y);
+                double w = Math.Abs(pos.X - startPoint.X);
+                double h = Math.Abs(pos.Y - startPoint.Y);
 
-            double x = Math.Min(pos.X, startPoint.X);
-            double y = Math.Min(pos.Y, startPoint.Y);
-            double w = Math.Abs(pos.X - startPoint.X);
-            double h = Math.Abs(pos.Y - startPoint.Y);
+                selectionRect.Width = w;
+                selectionRect.Height = h;
+                Canvas.SetLeft(selectionRect, x);
+                Canvas.SetTop(selectionRect, y);
+            }
+            else if (isPanning && e.MiddleButton == MouseButtonState.Pressed)
+            {
+                Point currentPos = e.GetPosition(this);
+                System.Windows.Vector delta = currentPos - startPoint;
 
-            selectionRect.Width = w;
-            selectionRect.Height = h;
-            Canvas.SetLeft(selectionRect, x);
-            Canvas.SetTop(selectionRect, y);
+                PanTransform.X += delta.X;
+                PanTransform.Y += delta.Y;
+
+                startPoint = currentPos;
+            }
+
+            e.Handled = true;
         }
 
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!isDrawing) return;
-
-            isDrawing = false;
-            Point endPoint = e.GetPosition(ImageCanvas);
-
-            int x = (int)Math.Min(startPoint.X, endPoint.X);
-            int y = (int)Math.Min(startPoint.Y, endPoint.Y);
-            int w = (int)Math.Abs(endPoint.X - startPoint.X);
-            int h = (int)Math.Abs(endPoint.Y - startPoint.Y);
-
-            if (w > 5 && h > 5)
+            if (isDrawing)
             {
-                var r = new Int32Rect(x, y, w, h);
-                var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f) };
-                Frames.Add(frame);
+                isDrawing = false;
+                Point endPoint = e.GetPosition(ImageCanvas);
 
-                //if (spriteSheetTransparency == false)//pas d'alpha
-                AdjustBoundFromSolidBackground(new[] { frame });
-                // else
-                //    AdjustBound(new[] { frame });
+                int x = (int)Math.Min(startPoint.X, endPoint.X);
+                int y = (int)Math.Min(startPoint.Y, endPoint.Y);
+                int w = (int)Math.Abs(endPoint.X - startPoint.X);
+                int h = (int)Math.Abs(endPoint.Y - startPoint.Y);
 
-                ShowOrigins(new[] { frame });
+                if (w > 5 && h > 5)
+                {
+                    var r = new Int32Rect(x, y, w, h);
+                    var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f) };
+                    Frames.Add(frame);
+
+                    //if (spriteSheetTransparency == false)//pas d'alpha
+                    AdjustBoundFromSolidBackground(new[] { frame });
+                    // else
+                    //    AdjustBound(new[] { frame });
+
+                    ShowOrigins(new[] { frame });
+                }
+
+                ImageCanvas.Children.Remove(selectionRect);
+                MainImage.ReleaseMouseCapture();
+            }
+            else if (isPanning)
+            {
+                isPanning = false;
+                MainImage.ReleaseMouseCapture();
             }
 
-            ImageCanvas.Children.Remove(selectionRect);
+            e.Handled = true;
         }
 
         private void ClearFrames_Click(object sender, RoutedEventArgs e)
@@ -734,13 +770,13 @@ namespace Animate
             RemoveFrames(frameList.SelectedItems.OfType<Frame>());
         }
 
-         public string PlaySymbol
-         {
-             get
-             {
-                 return animationTimer?.IsEnabled == true ? "||" : "▶︎";
-             }
-         }
+        public string PlaySymbol
+        {
+            get
+            {
+                return animationTimer?.IsEnabled == true ? "||" : "▶︎";
+            }
+        }
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
@@ -842,6 +878,52 @@ namespace Animate
             catch (Exception)
             {
             }
+        }
+
+        internal double zoomFactor = 1.0;
+        public double ZoomFactor
+        {
+            get { return zoomFactor; }
+            set
+            {
+                zoomFactor = value;
+                ZoomTransform.ScaleX = zoomFactor;
+                ZoomTransform.ScaleY = zoomFactor;
+                OnPropertyChange(nameof(ZoomFactor));
+            }
+        }
+
+        private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            Point mousePos = e.GetPosition(canvas);
+
+            double zoomFactor = e.Delta > 0 ? 1.1 : 1.0 / 1.1;
+
+            var st = ZoomTransform;
+            var tt = PanTransform;
+
+            // Zoom centré sur la souris
+            double absX = mousePos.X * st.ScaleX + tt.X;
+            double absY = mousePos.Y * st.ScaleY + tt.Y;
+
+            var f = st.ScaleX * zoomFactor;
+            if (f > ZoomSlider.Maximum)
+                f = ZoomSlider.Maximum;
+
+           // st.ScaleX = f;
+          //  st.ScaleY = f;
+
+            ZoomFactor = f;
+
+            tt.X = absX - mousePos.X * ZoomFactor;
+            tt.Y = absY - mousePos.Y * ZoomFactor;
+        }
+
+        private void Center_Click(object sender, RoutedEventArgs e)
+        {
+            PanTransform.X = 0;
+            PanTransform.Y = 0;
+            ZoomFactor = 1;
         }
     }
 }
