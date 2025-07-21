@@ -462,7 +462,7 @@ namespace Animate
         {
             var dlg = new OpenFileDialog
             {
-                Filter = "Image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp"
+                Filter = "Image files (*.png;*.jpg;*.bmp;*.tiff)|*.png;*.jpg;*.bmp;*.tiff"
             };
 
             if (dlg.ShowDialog() == true)
