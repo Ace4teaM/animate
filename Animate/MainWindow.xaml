@@ -73,12 +73,25 @@
 
         <!-- Canvas + Image -->
         <ScrollViewer x:Name="canvas" Grid.Row="2" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
-            <Canvas Name="ImageCanvas" Background="BlueViolet" 
+            <Canvas Name="ImageCanvas"
                     PreviewMouseDown="Canvas_MouseDown"
                     PreviewMouseMove="Canvas_MouseMove" 
                     PreviewMouseUp="Canvas_MouseUp"
                     PreviewMouseWheel="Canvas_MouseWheel"
                     >
+                <Canvas.Background>
+                    <DrawingBrush TileMode="Tile" Viewport="0,0,100,100" ViewportUnits="Absolute" >
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <!-- Carré blanc -->
+                                <GeometryDrawing Brush="White" Geometry="M0,0 L10,0 L10,10 L0,10 Z" />
+                                <!-- Carré noir -->
+                                <GeometryDrawing Brush="#eeeeee" Geometry="M5,0 L10,0 L10,5 L5,5 Z" />
+                                <GeometryDrawing Brush="#eeeeee" Geometry="M0,5 L5,5 L5,10 L0,10 Z" />
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Canvas.Background>
                 <Canvas.LayoutTransform>
                     <TransformGroup>
                         <ScaleTransform x:Name="ZoomTransform" ScaleX="{Binding ZoomFactor}" ScaleY="{Binding ZoomFactor}" />
