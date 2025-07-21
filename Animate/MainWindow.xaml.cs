@@ -627,9 +627,19 @@ namespace Animate
                 int w = (int)Math.Abs(endPoint.X - startPoint.X);
                 int h = (int)Math.Abs(endPoint.Y - startPoint.Y);
 
+                // max
+                if (spriteSheet != null)
+                {
+                    if (x + w > spriteSheet.Width)
+                        w = (int)spriteSheet.Width - x;
+                    if (y + h > spriteSheet.Height)
+                        h = (int)spriteSheet.Height - y;
+                }
+
                 if (w > 5 && h > 5)
                 {
                     var r = new Int32Rect(x, y, w, h);
+
                     var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f) };
                     Frames.Add(frame);
 
