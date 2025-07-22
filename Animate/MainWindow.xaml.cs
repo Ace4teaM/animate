@@ -599,8 +599,19 @@ namespace Animate
             e.Handled = true;
         }
 
+        public string MousePosition
+        {
+            get
+            {
+                Point pos = Mouse.GetPosition(ImageCanvas);
+                return $"X: {pos.X:0}, Y: {pos.Y:0}";
+            }
+        }
+
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
+            OnPropertyChange(nameof(MousePosition));
+
             if (isDrawing && selectionRect != null)
             {
                 Point pos = e.GetPosition(ImageCanvas);
