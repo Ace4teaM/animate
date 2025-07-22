@@ -8,7 +8,7 @@ public static class ImageConverter
 {
     public static BitmapImage ToBitmapImage(this BitmapSource bitmapSource)
     {
-        using (var stream = new MemoryStream())
+        var stream = new MemoryStream();
         {
             // Encodage en PNG (ou autre format)
             PngBitmapEncoder encoder = new PngBitmapEncoder();
@@ -31,7 +31,7 @@ public static class ImageConverter
     }
     public static Bitmap ToBitmap(this BitmapImage bitmapImage)
     {
-        using (MemoryStream stream = new MemoryStream())
+        MemoryStream stream = new MemoryStream();
         {
             // Encoder l'image en format PNG ou autre
             BitmapEncoder encoder = new PngBitmapEncoder();
@@ -47,7 +47,7 @@ public static class ImageConverter
     }
     public static Bitmap ToBitmap(this BitmapSource bitmapImage)
     {
-        using (MemoryStream stream = new MemoryStream())
+        MemoryStream stream = new MemoryStream();
         {
             // Encoder l'image en format PNG ou autre
             BitmapEncoder encoder = new PngBitmapEncoder();

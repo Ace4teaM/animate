@@ -507,7 +507,11 @@ namespace Animate
             spriteSheet.EndInit();
             spriteSheetTransparency = spriteSheet.HasActualTransparency();
 
-            spriteSheet = RemoveBackground(spriteSheet, 60.0).ToBitmapImage();
+            if (spriteSheetTransparency == false)
+            {
+                spriteSheet = RemoveBackground(spriteSheet, 60.0).ToBitmapImage();
+                spriteSheetTransparency = true;
+            }
 
             MainImage.Source = spriteSheet;
             MainImage.Width = spriteSheet.PixelWidth;
@@ -548,6 +552,13 @@ namespace Animate
                 spriteSheet.StreamSource = mem;
                 spriteSheet.CacheOption = BitmapCacheOption.OnLoad;
                 spriteSheet.EndInit();
+                spriteSheetTransparency = spriteSheet.HasActualTransparency();
+
+                if (spriteSheetTransparency == false)
+                {
+                    spriteSheet = RemoveBackground(spriteSheet, 60.0).ToBitmapImage();
+                    spriteSheetTransparency = true;
+                }
 
                 MainImage.Source = spriteSheet;
                 MainImage.Width = spriteSheet.PixelWidth;
