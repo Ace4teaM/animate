@@ -916,7 +916,7 @@ namespace Animate
         {
             if (spriteSheet == null || Frames.Count == 0)
             {
-                MessageBox.Show("Aucune image chargée ou aucun sprite défini.");
+                MessageBox.Show("No image loaded or no sprites defined.");
                 return;
             }
             var wnd = new ExportWindow
