@@ -8,6 +8,9 @@
         mc:Ignorable="d"
         Title="Animate !" Height="600" Width="1024"
         Loaded="Window_Loaded">
+    <Window.Resources>
+        <local:DblToStringConverter x:Key="DblToStringConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="551*"></ColumnDefinition>
@@ -19,6 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!-- Barre de titre -->
@@ -71,6 +75,17 @@
 
         <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" FontFamily="Verdana">Frames Stack</TextBlock>
 
+        <!-- Barre de status -->
+        <DockPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Height="30" Background="LightGray">
+            <ComboBox DockPanel.Dock="Right" FontSize="10" SelectedValuePath="Tag" SelectedValue="{Binding RotateTransformAngle, Mode=TwoWay, Converter={StaticResource DblToStringConverter}}">
+                <ComboBoxItem Tag="0"  Content="0°" IsSelected="True" />
+                <ComboBoxItem Tag="90" Content="90°" />
+                <ComboBoxItem Tag="180" Content="180°" />
+                <ComboBoxItem Tag="270" Content="270°" />
+            </ComboBox>
+            <Grid></Grid>
+        </DockPanel>
+
         <!-- Canvas + Image -->
         <ScrollViewer x:Name="canvas" Grid.Row="2" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Grid.ColumnSpan="2">
             <Canvas Name="ImageCanvas"
@@ -95,6 +110,7 @@
                 <Canvas.LayoutTransform>
                     <TransformGroup>
                         <ScaleTransform x:Name="ZoomTransform" ScaleX="{Binding ZoomFactor}" ScaleY="{Binding ZoomFactor}" />
+                        <RotateTransform x:Name="rotateTransform"></RotateTransform>
                     </TransformGroup>
                 </Canvas.LayoutTransform>
                 <Canvas.RenderTransform>

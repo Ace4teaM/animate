@@ -115,6 +115,20 @@ namespace Animate
             }
         }
 
+        internal double rotateTransformAngle;
+        public double RotateTransformAngle
+        {
+            get
+            {
+                return rotateTransformAngle;
+            }
+            set
+            {
+                rotateTransformAngle = value;
+                rotateTransform.Angle = value;
+            }
+        }
+
         public double FrameDurationValue
         {
             get
