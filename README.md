@@ -20,6 +20,12 @@ Animate implements Windows 11 Light/Dark styles configurable from the Windows Co
 
 ![](Theme.PNG)
 
+## Auto synchronization
+
+Animate automatically detects changes to your drawing and immediately reloads the view, allowing you to view your work in real time.
+
+You can go further and use a third-party synchronization system (e.g., **Syncthing**) to sync your work from an Android/Mac tablet and view it on a Windows PC as you make edits.
+
 ## Release
 
 https://github.com/Ace4teaM/animate/releases

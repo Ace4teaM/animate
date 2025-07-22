@@ -19,6 +19,12 @@ Animate implémente les styles Windows 11 Clair/Sombre configurable depuis le pa
 
 ![](Theme.PNG)
 
+## Synchronisation auto
+
+Animate détecte automatiquement les modifications apportées à votre dessin et recharge immédiatement la vue pour vous permettre de visualiser en temps réel votre travail.
+
+Vous pouvez aller plus loin et utiliser un système de synchronisation tiers (ex: **Syncthing**) pour synchroniser votre travail depuis une tablette Android/Mac et visualiser vos travail sur un PC Windows au fur et a mesure de vos retouches. 
+
 ## Release
 
 https://github.com/Ace4teaM/animate/releases
