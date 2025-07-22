@@ -26,6 +26,7 @@ namespace Animate
         internal Int32Rect rect;
         internal Vector2 origin;
         internal int frameCount = 1;
+        internal CroppedBitmap? bitmap = null;
 
         public string Position
         {
@@ -431,8 +432,7 @@ namespace Animate
                 if (Frames.Count == 0 || spriteSheet == null) return;
 
                 var frame = Frames[currentFrameIndex];
-                var cropped = new CroppedBitmap(spriteSheet, frame.rect);
-                AnimedImage.Source = cropped;
+                AnimedImage.Source = frame.bitmap;
 
                 currentFrameIndex = (currentFrameIndex + 1) % Frames.Count;
 
@@ -634,21 +634,21 @@ namespace Animate
                         w = (int)spriteSheet.Width - x;
                     if (y + h > spriteSheet.Height)
                         h = (int)spriteSheet.Height - y;
-                }
 
-                if (w > 5 && h > 5)
-                {
-                    var r = new Int32Rect(x, y, w, h);
+                    if (w > 5 && h > 5)
+                    {
+                        var r = new Int32Rect(x, y, w, h);
 
-                    var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f) };
-                    Frames.Add(frame);
+                        var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f), bitmap = new CroppedBitmap(spriteSheet, r) };
+                        Frames.Add(frame);
 
-                    //if (spriteSheetTransparency == false)//pas d'alpha
-                    AdjustBoundFromSolidBackground([frame]);
-                    // else
-                    //    AdjustBound(new[] { frame });
+                        //if (spriteSheetTransparency == false)//pas d'alpha
+                        AdjustBoundFromSolidBackground([frame]);
+                        // else
+                        //    AdjustBound(new[] { frame });
 
-                    ShowOrigins([frame]);
+                        ShowOrigins([frame]);
+                    }
                 }
 
                 ImageCanvas.Children.Remove(selectionRect);
