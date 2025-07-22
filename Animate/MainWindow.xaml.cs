@@ -60,9 +60,11 @@ namespace Animate
     {
         private BitmapImage? spriteSheet;
         private bool spriteSheetTransparency = false;
-        private bool spriteChanged = false;
+        internal bool spriteChanged = false;
         private string? spritePath;
-        FileSystemWatcher? spriteSheetSystemWatcher;
+        FileChangeNotification? fileChangeNotification;
+        CancellationTokenSource? fileChangeCancellation;
+
         public ObservableCollection<Frame> Frames { get; } = [];
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle? selectionRect;
@@ -521,12 +523,25 @@ namespace Animate
 
             ClearFrames(); // Optionnel : garde ou efface les frames existants
 
-            spriteSheetSystemWatcher = new FileSystemWatcher(dirname, filename);
-            spriteSheetSystemWatcher.BeginInit();
-            spriteSheetSystemWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess;
-            spriteSheetSystemWatcher.Changed += SpriteSheetSystemWatcher_Changed;
-            spriteSheetSystemWatcher.EnableRaisingEvents = true;
-            spriteSheetSystemWatcher.EndInit();
+            InitFileChangeNotification(path);
+        }
+
+        internal void InitFileChangeNotification(string path)
+        {
+            if (fileChangeCancellation != null)
+            {
+                fileChangeCancellation.Cancel();
+                fileChangeCancellation.Dispose();
+            }
+            fileChangeCancellation = new CancellationTokenSource();
+            fileChangeNotification = new FileChangeNotification(path, fileChangeCancellation);
+            new Thread(() =>
+            {
+                fileChangeNotification.Wait();
+            })
+            {
+                IsBackground = true // 💡 Permet de ne pas bloquer l'arrêt du programme
+            }.Start();
         }
 
         internal void ReLoadImage()
@@ -566,16 +581,17 @@ namespace Animate
                 ImageCanvas.Width = spriteSheet.PixelWidth;
                 ImageCanvas.Height = spriteSheet.PixelHeight;
 
+                // recharge les frames
+                foreach(var frame in Frames)
+                {
+                    frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
+                }
+
                 spriteChanged = false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
             }
-        }
-
-        private void SpriteSheetSystemWatcher_Changed(object sender, FileSystemEventArgs e)
-        {
-            spriteChanged = true;
         }
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
