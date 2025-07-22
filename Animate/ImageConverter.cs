@@ -6,6 +6,29 @@ using System.Windows.Media.Imaging;
 
 public static class ImageConverter
 {
+    public static BitmapImage ToBitmapImage(this BitmapSource bitmapSource)
+    {
+        using (var stream = new MemoryStream())
+        {
+            // Encodage en PNG (ou autre format)
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            encoder.Save(stream);
+
+            // Revenir au début du stream
+            stream.Seek(0, SeekOrigin.Begin);
+
+            // Chargement dans un BitmapImage
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.StreamSource = stream;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze(); // optionnel : rend le BitmapImage thread-safe
+
+            return bitmapImage;
+        }
+    }
     public static Bitmap ToBitmap(this BitmapImage bitmapImage)
     {
         using (MemoryStream stream = new MemoryStream())

@@ -24,7 +24,7 @@ namespace Animate
         internal Int32Rect rect;
         internal Vector2 origin;
         internal int frameCount = 1;
-        internal CroppedBitmap? bitmap = null;
+        internal BitmapSource? bitmap = null;
 
         public string Position
         {
@@ -493,6 +493,8 @@ namespace Animate
             spriteSheet.EndInit();
             spriteSheetTransparency = spriteSheet.HasActualTransparency();
 
+            spriteSheet = RemoveBackground(spriteSheet, 60.0).ToBitmapImage();
+
             MainImage.Source = spriteSheet;
             MainImage.Width = spriteSheet.PixelWidth;
             MainImage.Height = spriteSheet.PixelHeight;
@@ -783,6 +785,80 @@ namespace Animate
         {
             ExportImages();
         }
+        public static BitmapSource RemoveBackground(BitmapSource croppedBitmap, double tolerance)
+        {
+            int width = croppedBitmap.PixelWidth;
+            int height = croppedBitmap.PixelHeight;
+
+            // Convert to a format we can manipulate
+            FormatConvertedBitmap formattedBitmap = new FormatConvertedBitmap(croppedBitmap, PixelFormats.Bgra32, null, 0);
+
+            int stride = width * 4;
+            byte[] pixels = new byte[height * stride];
+            formattedBitmap.CopyPixels(pixels, stride, 0);
+
+            // 1. Calcul de la couleur moyenne du carré 5x5 en haut à gauche
+            int sampleSize = 5;
+            sampleSize = Math.Min(sampleSize, Math.Min(width, height));
+
+            long sumR = 0, sumG = 0, sumB = 0;
+            for (int y = 0; y < sampleSize; y++)
+            {
+                for (int x = 0; x < sampleSize; x++)
+                {
+                    int index = (y * stride) + (x * 4);
+                    byte b = pixels[index + 0];
+                    byte g = pixels[index + 1];
+                    byte r = pixels[index + 2];
+
+                    sumR += r;
+                    sumG += g;
+                    sumB += b;
+                }
+            }
+
+            int totalPixels = sampleSize * sampleSize;
+            byte refR = (byte)(sumR / totalPixels);
+            byte refG = (byte)(sumG / totalPixels);
+            byte refB = (byte)(sumB / totalPixels);
+
+            // 2. Appliquer transparence progressive selon la distance à la couleur de fond
+            double maxDistance = 441.67; // distance maximale entre deux couleurs (sqrt(255^2 * 3))
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = (y * stride) + (x * 4);
+                    byte b = pixels[index + 0];
+                    byte g = pixels[index + 1];
+                    byte r = pixels[index + 2];
+
+                    // distance euclidienne RGB
+                    double distance = Math.Sqrt(
+                        (r - refR) * (r - refR) +
+                        (g - refG) * (g - refG) +
+                        (b - refB) * (b - refB)
+                    );
+
+                    double normalized = distance / tolerance;
+
+                    byte alpha;
+                    if (normalized >= 1)
+                        alpha = 255;
+                    else
+                        alpha = (byte)(255 * normalized);
+
+                    pixels[index + 3] = alpha;
+                }
+            }
+
+            // 3. Créer une nouvelle image avec fond transparent
+            WriteableBitmap transparentBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+            transparentBitmap.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+
+            return transparentBitmap;
+        }
 
         private void ExportImages()
         {
@@ -818,7 +894,7 @@ namespace Animate
                         var origin = Frames[i].origin;
 
                         var rect = Frames[i].rect;
-                        var cropped = new CroppedBitmap(spriteSheet, rect);
+                        var cropped = Frames[i].bitmap;
 
                         // copie l'image dans une image vierge adapté aux proportions finales (texture)
                         var final = new System.Drawing.Bitmap(width, height);
