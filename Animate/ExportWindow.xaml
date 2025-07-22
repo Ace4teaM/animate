@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Animate"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
+        Loaded="Window_Loaded"
         Title="Export images..." >
     <Window.Resources>
         <local:IntToStringConverter x:Key="IntToStringConverter"/>
@@ -13,20 +14,34 @@
     <DockPanel Margin="6">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
             <TextBlock  VerticalAlignment="Center" Text="Image Width" Width="120"></TextBlock>
-            <TextBox  VerticalAlignment="Center" Text="{Binding ImageWidth, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" Width="90"></TextBox>
+            <TextBox VerticalAlignment="Center" Text="{Binding ImageWidth, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" Width="90"></TextBox>
             <TextBlock  VerticalAlignment="Center" Text="px" Width="20" TextAlignment="Right"></TextBlock>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
             <TextBlock VerticalAlignment="Center" Text="Image Height" Width="120"></TextBlock>
-            <TextBox  VerticalAlignment="Center" Text="{Binding ImageHeight, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" Width="90"></TextBox>
+            <TextBox VerticalAlignment="Center" Text="{Binding ImageHeight, Converter={StaticResource IntToStringConverter}, UpdateSourceTrigger=PropertyChanged}" Width="90"></TextBox>
             <TextBlock  VerticalAlignment="Center" Text="px" Width="20" TextAlignment="Right"></TextBlock>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center" Text="Size Adjust" Width="120"></TextBlock>
-            <CheckBox VerticalAlignment="Center" IsChecked="{Binding AdjustSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-            <TextBlock VerticalAlignment="Center" Text="{Binding AdjustedImageWidth}" Margin="10,0,0,0"></TextBlock>
-            <TextBlock VerticalAlignment="Center" Text="x" Margin="10,0,0,0"></TextBlock>
-            <TextBlock VerticalAlignment="Center" Text="{Binding AdjustedImageHeight}" Margin="10,0,0,0"></TextBlock>
+            <StackPanel Orientation="Horizontal" Width="120">
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding AdjustSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                <TextBlock VerticalAlignment="Center" Text="Size Adjust"></TextBlock>
+            </StackPanel>
+            <TextBlock VerticalAlignment="Center" Width="100" TextAlignment="Center">
+                <Run Text="{Binding AdjustedImageWidth, Mode=OneWay}"></Run>
+                <Run Text=" x "></Run>
+                <Run Text="{Binding AdjustedImageHeight, Mode=OneWay}"></Run>
+            </TextBlock>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <!-- TextBlock pour afficher la valeur actuelle -->
+            <Slider Name="divSlider" Minimum="0" Maximum="4" Value="0" TickFrequency="1" SmallChange="1" LargeChange="2" IsSnapToTickEnabled="True"
+                VerticalAlignment="Center" HorizontalAlignment="Center" Width="120" ValueChanged="Slider_ValueChanged"/>
+            <TextBlock VerticalAlignment="Center" Width="100" TextAlignment="Center">
+                <Run Text="{Binding AdjustedAndResizedImageWidth, Mode=OneWay}"></Run>
+                <Run Text=" x "></Run>
+                <Run Text="{Binding AdjustedAndResizedImageHeight, Mode=OneWay}"></Run>
+            </TextBlock>
         </StackPanel>
         <Border DockPanel.Dock="Bottom">
             <Button Width="120" HorizontalAlignment="Right" Click="Button_Click">Export</Button>

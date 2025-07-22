@@ -5,11 +5,10 @@ using Emgu.CV.Util;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing.Drawing2D;
 using System.IO;
-using System.Net.Cache;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -17,7 +16,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using System.Xml.Linq;
 
 namespace Animate
 {
@@ -813,11 +811,14 @@ namespace Animate
 
                     for (int i = 0; i < Frames.Count; i++)
                     {
+                        string fileName = Path.Combine(folderPath, $"sprite_{i}.png");
+
                         var origin = Frames[i].origin;
 
                         var rect = Frames[i].rect;
                         var cropped = new CroppedBitmap(spriteSheet, rect);
 
+                        // copie l'image dans une image vierge adapté aux proportions finales (texture)
                         var final = new System.Drawing.Bitmap(width, height);
 
                         using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(final))
@@ -826,16 +827,35 @@ namespace Animate
                             g.DrawImage(cropped.ToBitmap(), (width / 2) - origin.X, (height / 2) - origin.Y);
                         }
 
-                        string fileName = Path.Combine(folderPath, $"sprite_{i}.png");
-
-                        final.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
-                        /*
-                        using (FileStream stream = new FileStream(fileName, FileMode.Create))
+                        // redimensionne (si besoin d'abaisser la résolution)
+                        if (wnd.AdjustSize == true && wnd.AdjustedImageWidth != wnd.AdjustedAndResizedImageWidth)
                         {
-                            PngBitmapEncoder encoder = new PngBitmapEncoder();
-                            encoder.Frames.Add(BitmapFrame.Create(final));
-                            encoder.Save(stream);
-                        }*/
+                            int newWidth = wnd.AdjustedAndResizedImageWidth;
+                            int newHeight = wnd.AdjustedAndResizedImageHeight;
+
+                            using (System.Drawing.Bitmap resizedBitmap = new System.Drawing.Bitmap(newWidth, newHeight))
+                            {
+                                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(resizedBitmap))
+                                {
+                                    // Paramètres de qualité
+                                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                                    g.CompositingQuality = CompositingQuality.HighQuality;
+
+                                    // Dessiner l'image redimensionnée
+                                    g.DrawImage(final, 0, 0, newWidth, newHeight);
+                                }
+
+                                // Exporte l'image
+                                resizedBitmap.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
+                            }
+                        }
+                        else
+                        {
+                            // Exporte l'image
+                            final.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
                     }
 
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(folderPath) { UseShellExecute = true });
