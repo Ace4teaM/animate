@@ -637,13 +637,15 @@ namespace Animate
                     {
                         var r = new Int32Rect(x, y, w, h);
 
-                        var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f), bitmap = new CroppedBitmap(spriteSheet, r) };
+                        var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f) };
                         Frames.Add(frame);
 
                         //if (spriteSheetTransparency == false)//pas d'alpha
                         AdjustBoundFromSolidBackground([frame]);
                         // else
                         //    AdjustBound(new[] { frame });
+
+                        frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
 
                         ShowOrigins([frame]);
                     }
