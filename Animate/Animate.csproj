@@ -15,9 +15,14 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Remove="sprites.bmp" />
+  </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Icon.ico" />
+    <Resource Include="sprites.bmp" />
   </ItemGroup>
 
   <ItemGroup>

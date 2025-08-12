@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Ocl;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Microsoft.Win32;
@@ -526,6 +527,34 @@ namespace Animate
             InitFileChangeNotification(path);
         }
 
+        internal void LoadImage(Stream stream)
+        {
+            spriteChanged = false;
+            spritePath = null;
+            spriteSheet = new BitmapImage();
+            spriteSheet.BeginInit();
+            var mem = new MemoryStream();
+            stream.CopyTo(mem);
+            spriteSheet.StreamSource = mem;
+            spriteSheet.CacheOption = BitmapCacheOption.OnLoad;
+            spriteSheet.EndInit();
+            spriteSheetTransparency = spriteSheet.HasActualTransparency();
+
+            if (spriteSheetTransparency == false)
+            {
+                spriteSheet = RemoveBackground(spriteSheet, 60.0).ToBitmapImage();
+                spriteSheetTransparency = true;
+            }
+
+            MainImage.Source = spriteSheet;
+            MainImage.Width = spriteSheet.PixelWidth;
+            MainImage.Height = spriteSheet.PixelHeight;
+            ImageCanvas.Width = spriteSheet.PixelWidth;
+            ImageCanvas.Height = spriteSheet.PixelHeight;
+
+            ClearFrames(); // Optionnel : garde ou efface les frames existants
+        }
+
         internal void InitFileChangeNotification(string path)
         {
             if (fileChangeCancellation != null)
@@ -750,6 +779,21 @@ namespace Animate
             {
                 var path = Path.GetFullPath(args[1]);
                 LoadImage(path);
+            }
+            else
+            {
+                try
+                {
+                    var uri = new Uri("pack://application:,,,/sprites.bmp", UriKind.Absolute);
+                    using (Stream s = Application.GetResourceStream(uri).Stream)
+                    {
+                        LoadImage(s);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
 

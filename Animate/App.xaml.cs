@@ -20,9 +20,6 @@ namespace Animate
 
             this.MainWindow = new MainWindow();
             this.MainWindow.Show();
-
-            //if(e.Args.Length > 1)
-            //    ((MainWindow)this.MainWindow).LoadImage(e.Args[1]);
         }
     }
 }
