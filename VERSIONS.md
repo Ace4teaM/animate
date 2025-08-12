@@ -2,6 +2,10 @@
 
 **Historique**
 
+v1.0.3 [download](https://github.com/Ace4teaM/animate/releases/tag/v1.0.3)
+
+* Charge comme image par défaut une animation si aucun fichier n'est passé en argument
+
 v1.0.2 [download](https://github.com/Ace4teaM/animate/releases/tag/v1.0.2)
 
 * Corrections bug (rechargement fichier source, conso. mémoire, fond transparent, crash sur sélection)
