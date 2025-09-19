@@ -57,6 +57,33 @@ namespace Animate
         {
             DialogResult = true;//CloseWindow
         }
+ 
+        public ExportSettings GetExportSettings()
+        {
+            return new ExportSettings
+            {
+                ImageWidth = ImageWidth,
+                ImageHeight = ImageHeight,
+                AdjustSize = AdjustSize ?? true,
+                SliderValue = divSlider != null ? (int)divSlider.Value : 0
+            };
+        }
+
+        public void SetExportSettings(ExportSettings settings)
+        {
+            if (settings == null) return;
+
+            ImageWidth = settings.ImageWidth;
+            ImageHeight = settings.ImageHeight;
+            AdjustSize = settings.AdjustSize;
+            
+            if (divSlider != null)
+            {
+                ResolutionChange();
+                if (settings.SliderValue <= divSlider.Maximum)
+                    divSlider.Value = settings.SliderValue;
+            }
+        }
 
         // Gestion de l'événement ValueChanged du Slider
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

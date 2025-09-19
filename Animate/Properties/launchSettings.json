@@ -2,8 +2,7 @@
   "profiles": {
     "Animate": {
       "commandName": "Project",
-      "commandLineArgs": "sprites.bmp",
-      "workingDirectory": "C:\\Users\\aceteam\\source\\repos\\animate\\Animate"
+      "commandLineArgs": "H:\\Dessins\\65a608e9-31fd-4860-a88a-e630adee7be3.tiff"
     }
   }
 }

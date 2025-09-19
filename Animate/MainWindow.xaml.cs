@@ -188,6 +188,9 @@ namespace Animate
             SetupAnimationTimer();
             SetupReloadTimer();
             this.DataContext = this;
+            
+            // Nettoyage des paramètres d'images supprimées au démarrage
+            Task.Run(() => RegistryManager.CleanupMissingFiles());
         }
 
         /// <summary>
@@ -524,6 +527,8 @@ namespace Animate
 
             ClearFrames(); // Optionnel : garde ou efface les frames existants
 
+            LoadImageSettings(path);
+
             InitFileChangeNotification(path);
         }
 
@@ -731,6 +736,7 @@ namespace Animate
                         frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
 
                         ShowOrigins([frame]);
+                        OnFramesChanged();
                     }
                 }
 
@@ -749,6 +755,8 @@ namespace Animate
         private void ClearFrames_Click(object sender, RoutedEventArgs e)
         {
             ClearFrames();
+
+            OnFramesChanged();
         }
 
         private void ClearFrames()
@@ -756,7 +764,7 @@ namespace Animate
             Frames.Clear();
             currentFrameIndex = 0;
 
-            // Efface tous les rectangles sauf l’image
+            // Efface tous les rectangles sauf l'image
             foreach (var child in ImageCanvas.Children.OfType<FrameworkElement>().Where(p => p.Tag is Frame).ToArray())
             {
                 ImageCanvas.Children.Remove(child);
@@ -770,6 +778,7 @@ namespace Animate
             foreach (var frame in _frames)
                 Frames.Remove(frame);
             HideOrigins(_frames);
+            OnFramesChanged();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -857,6 +866,8 @@ namespace Animate
                         Frames.RemoveAt(remIdx);
                     }
                 }
+                
+                OnFramesChanged();
             }
         }
 
@@ -875,6 +886,7 @@ namespace Animate
         private void AdjusteOrigins_Click(object sender, RoutedEventArgs e)
         {
             AdjustOrigins(Frames);
+            OnFramesChanged();
         }
 
         private void ExportImages_Click(object sender, RoutedEventArgs e)
@@ -971,8 +983,24 @@ namespace Animate
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
 
+            // Charger les paramètres d'export sauvegardés
+            if (!string.IsNullOrEmpty(spritePath))
+            {
+                var settings = RegistryManager.LoadImageSettings(spritePath);
+                if (settings?.ExportSettings != null)
+                {
+                    wnd.SetExportSettings(settings.ExportSettings);
+                }
+            }
+
             if (wnd.ShowDialog() == true)
             {
+                // Sauvegarder les paramètres d'export
+                if (!string.IsNullOrEmpty(spritePath))
+                {
+                    var exportSettings = wnd.GetExportSettings();
+                    RegistryManager.SaveImageSettings(spritePath, Frames.ToList(), exportSettings);
+                }
                 int width = wnd.AdjustSize == false ? wnd.ImageWidth : wnd.AdjustedImageWidth;
                 int height = wnd.AdjustSize == false ? wnd.ImageHeight : wnd.AdjustedImageHeight;
                 try
@@ -1200,6 +1228,48 @@ namespace Animate
             PanTransform.X = 0;
             PanTransform.Y = 0;
             ZoomFactor = 1;
+        }
+
+        private void LoadImageSettings(string imagePath)
+        {
+            var settings = RegistryManager.LoadImageSettings(imagePath);
+            if (settings == null)
+                return;
+
+            if (settings.Frames != null && settings.Frames.Count > 0)
+            {
+                foreach (var frameData in settings.Frames)
+                {
+                    var frame = new Frame
+                    {
+                        rect = new Int32Rect(frameData.X, frameData.Y, frameData.Width, frameData.Height),
+                        origin = new Vector2(frameData.OriginX, frameData.OriginY),
+                        frameCount = frameData.FrameCount
+                    };
+
+                    if (spriteSheet != null)
+                    {
+                        frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
+                    }
+
+                    Frames.Add(frame);
+                }
+
+                ShowOrigins(Frames);
+            }
+        }
+
+        private void SaveImageSettings()
+        {
+            if (string.IsNullOrEmpty(spritePath))
+                return;
+
+            RegistryManager.SaveImageSettings(spritePath, Frames.ToList());
+        }
+
+        private void OnFramesChanged()
+        {
+            SaveImageSettings();
         }
     }
 }
