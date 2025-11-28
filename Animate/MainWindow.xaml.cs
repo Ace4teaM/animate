@@ -1087,6 +1087,10 @@ namespace Animate
 
                         using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(final))
                         {
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+                            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+
                             var diffX = origin.X - (rect.Width / 2.0);
                             var diffY = origin.Y - (rect.Height / 2.0);
                             g.TranslateTransform((float)-diffX, (float)-diffY);
