@@ -15,6 +15,7 @@ namespace Animate
         private int imageHeight;
         private int imageWidth;
 
+        public string ImagePrefix { get; set; } = "sprite_";
         public int ImageHeight { get => imageHeight; set { imageHeight = value; ResolutionChange(); OnPropertyChange(nameof(AdjustedImageHeight)); } }
         public int ImageWidth { get => imageWidth; set { imageWidth = value; ResolutionChange(); OnPropertyChange(nameof(AdjustedImageWidth)); } }
         public bool? AdjustSize { get; set; } = true;
@@ -62,6 +63,7 @@ namespace Animate
         {
             return new ExportSettings
             {
+                ImagePrefix = ImagePrefix,
                 ImageWidth = ImageWidth,
                 ImageHeight = ImageHeight,
                 AdjustSize = AdjustSize ?? true,
@@ -73,6 +75,7 @@ namespace Animate
         {
             if (settings == null) return;
 
+            ImagePrefix = settings.ImagePrefix;
             ImageWidth = settings.ImageWidth;
             ImageHeight = settings.ImageHeight;
             AdjustSize = settings.AdjustSize;

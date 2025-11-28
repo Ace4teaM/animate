@@ -43,6 +43,10 @@
                 <Run Text="{Binding AdjustedAndResizedImageHeight, Mode=OneWay}"></Run>
             </TextBlock>
         </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center" Text="Prefixe" Width="120"></TextBlock>
+            <TextBox VerticalAlignment="Center" Text="{Binding ImagePrefix}" Width="110"></TextBox>
+        </StackPanel>
         <Border DockPanel.Dock="Bottom">
             <Button Width="120" HorizontalAlignment="Right" Click="Button_Click">Export</Button>
         </Border>
