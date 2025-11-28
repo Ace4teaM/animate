@@ -762,10 +762,10 @@ namespace Animate
                 // max
                 if (spriteSheet != null)
                 {
-                    if (x + w > spriteSheet.Width)
-                        w = (int)spriteSheet.Width - x;
-                    if (y + h > spriteSheet.Height)
-                        h = (int)spriteSheet.Height - y;
+                    if (x + w > spriteSheet.PixelWidth)
+                        w = (int)spriteSheet.PixelWidth - x;
+                    if (y + h > spriteSheet.PixelHeight)
+                        h = (int)spriteSheet.PixelHeight - y;
 
                     if (w > 5 && h > 5)
                     {
@@ -1083,6 +1083,7 @@ namespace Animate
 
                         // copie l'image dans une image vierge adapté aux proportions finales (texture)
                         var final = new System.Drawing.Bitmap(width, height);
+                        final.SetResolution(96, 96);
 
                         using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(final))
                         {
@@ -1090,7 +1091,9 @@ namespace Animate
                             var diffY = origin.Y - (rect.Height / 2.0);
                             g.TranslateTransform((float)-diffX, (float)-diffY);
                             g.Clear(System.Drawing.Color.Transparent);
-                            g.DrawImage(cropped.ToBitmap(), (int)((width / 2.0) - (rect.Width / 2.0)), (int)((height / 2.0) - (rect.Height / 2.0)));
+                            var bmp = cropped.ToBitmap();
+                            bmp.SetResolution(96, 96);
+                            g.DrawImage(bmp, (int)((width / 2.0) - (rect.Width / 2.0)), (int)((height / 2.0) - (rect.Height / 2.0)));
                         }
 
                         // redimensionne (si besoin d'abaisser la résolution)
@@ -1101,6 +1104,7 @@ namespace Animate
 
                             using (System.Drawing.Bitmap resizedBitmap = new System.Drawing.Bitmap(newWidth, newHeight))
                             {
+                                resizedBitmap.SetResolution(96, 96);
                                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(resizedBitmap))
                                 {
                                     // Paramètres de qualité
