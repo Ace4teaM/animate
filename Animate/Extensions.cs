@@ -26,5 +26,9 @@ namespace Animate
             var listViewItem = FindAncestor<ListViewItem>(element);
             return listViewItem != null ? listView.ItemContainerGenerator.ItemFromContainer(listViewItem) as T : null;
         }
+        internal static bool Contains(this Int32Rect rect, Point point)
+        {
+            return (point.X >= rect.X && point.X < rect.X + rect.Width) && (point.Y >= rect.Y && point.Y < rect.Y + rect.Height);
+        }
     }
 }

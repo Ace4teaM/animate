@@ -23,9 +23,17 @@ namespace Animate
     public class Frame
     {
         internal Int32Rect rect;
-        internal Vector2 origin;
+        internal Vector2 origin = Vector2.NegativeInfinity;
         internal int frameCount = 1;
         internal BitmapSource? bitmap = null;
+        
+        public bool HasOrigin
+        {
+            get
+            {
+                return origin != Vector2.NegativeInfinity;
+            }
+        }
 
         public string Position
         {
@@ -69,7 +77,20 @@ namespace Animate
         public ObservableCollection<Frame> Frames { get; } = [];
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle? selectionRect;
+
+        /// <summary>
+        /// Action du curseur = Pointe une position
+        /// </summary>
+        private bool isPointing = false;
+
+        /// <summary>
+        /// Action du curseur = Dessiner un rectangle
+        /// </summary>
         private bool isDrawing = false;
+
+        /// <summary>
+        /// Action du curseur = Déplacer la toile
+        /// </summary>
         private bool isPanning = false;
 
         private int currentFrameIndex = 0;
@@ -176,6 +197,7 @@ namespace Animate
             var frame = Frames[currentFrameIndex];
             var cropped = new CroppedBitmap(spriteSheet, frame.rect);
             AnimedImage.Source = cropped;
+            AnimedImage.RenderTransform = frame.HasOrigin ? new TranslateTransform(-(frame.origin.X - frame.rect.Width / 2.0), -(frame.origin.Y - frame.rect.Height / 2.0)) : Transform.Identity;
 
             OnPropertyChange(nameof(PlaySymbol));
 
@@ -365,6 +387,9 @@ namespace Animate
 
             foreach (var frame in frames)
             {
+                if (frame.HasOrigin == false)
+                    continue;
+
                 var rect = new System.Windows.Shapes.Rectangle
                 {
                     Stroke = Brushes.Red,
@@ -451,6 +476,7 @@ namespace Animate
 
                 var frame = Frames[currentFrameIndex];
                 AnimedImage.Source = frame.bitmap;
+                AnimedImage.RenderTransform = frame.HasOrigin ? new TranslateTransform(-(frame.origin.X - frame.rect.Width/2.0), -(frame.origin.Y - frame.rect.Height / 2.0)) : Transform.Identity;
 
                 currentFrameIndex = (currentFrameIndex + 1) % Frames.Count;
 
@@ -656,6 +682,12 @@ namespace Animate
                 startPoint = e.GetPosition(this);
                 MainImage.CaptureMouse();
             }
+            else if (e.RightButton == MouseButtonState.Pressed)
+            {
+                isPointing = true;
+                startPoint = e.GetPosition(this);
+                MainImage.CaptureMouse();
+            }
 
             e.Handled = true;
         }
@@ -695,6 +727,11 @@ namespace Animate
                 PanTransform.X += delta.X;
                 PanTransform.Y += delta.Y;
 
+                startPoint = currentPos;
+            }
+            else if (isPointing && e.RightButton == MouseButtonState.Pressed)
+            {
+                Point currentPos = e.GetPosition(MainImage);
                 startPoint = currentPos;
             }
 
@@ -747,6 +784,20 @@ namespace Animate
             else if (isPanning)
             {
                 isPanning = false;
+                MainImage.ReleaseMouseCapture();
+            }
+            else if (isPointing)
+            {
+                isPointing = false;
+                Point pos = Mouse.GetPosition(ImageCanvas);
+                var frame = Frames.FirstOrDefault(p=>p.rect.Contains(pos));
+                if(frame != null)
+                {
+                    frame.origin = new Vector2((float)(pos.X - frame.rect.X), (float)(pos.Y - frame.rect.Y));
+                    ShowOrigins([frame]);
+                    SetFrame(Frames.IndexOf(frame));
+                    OnFramesChanged();
+                }
                 MainImage.ReleaseMouseCapture();
             }
 
