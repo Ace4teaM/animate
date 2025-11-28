@@ -728,10 +728,11 @@ namespace Animate
                         var frame = new Frame { rect = r, frameCount = 1, origin = new Vector2(r.Width / 2.0f, r.Height / 2.0f) };
                         Frames.Add(frame);
 
-                        //if (spriteSheetTransparency == false)//pas d'alpha
-                        AdjustBoundFromSolidBackground([frame]);
-                        // else
-                        //    AdjustBound(new[] { frame });
+                        // Ajuste automatiquement le rectangle au contenu
+                        if (!Keyboard.IsKeyDown(Key.LeftCtrl) && !Keyboard.IsKeyDown(Key.RightCtrl))
+                        {
+                            AdjustBoundFromSolidBackground([frame]);
+                        }
 
                         frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
 
