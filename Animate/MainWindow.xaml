@@ -15,7 +15,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="551*"></ColumnDefinition>
             <ColumnDefinition Width="273*"/>
-            <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="220"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
@@ -137,7 +137,7 @@
                     <Label></Label>
                 </DockPanel>
             </Border>
-            <Border DockPanel.Dock="Bottom" Height="200" BorderThickness="1" BorderBrush="Black" Margin="6">
+            <Border Name="AnimatedContainer" ClipToBounds="True" DockPanel.Dock="Bottom" Height="200" Width="200" BorderThickness="1" BorderBrush="Black" Margin="6">
                 <Border.Background>
                     <DrawingBrush TileMode="Tile" Viewport="0,0,50,50" ViewportUnits="Absolute" >
                         <DrawingBrush.Drawing>
@@ -151,7 +151,7 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </Border.Background>
-                <Image Name="AnimedImage"/>
+                <Image Name="AnimedImage" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Click="Prev_Click">

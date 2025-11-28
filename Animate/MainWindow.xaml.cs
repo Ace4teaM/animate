@@ -196,8 +196,12 @@ namespace Animate
 
             var frame = Frames[currentFrameIndex];
             var cropped = new CroppedBitmap(spriteSheet, frame.rect);
+
+            var ratio = frame.rect.Width > frame.rect.Height ? (double)(frame.rect.Width / AnimatedContainer.Width) : (double)(frame.rect.Height / AnimatedContainer.Height);
+
+            AnimedImage.Width = frame.rect.Width / ratio;
             AnimedImage.Source = cropped;
-            AnimedImage.RenderTransform = frame.HasOrigin ? new TranslateTransform(-(frame.origin.X - frame.rect.Width / 2.0), -(frame.origin.Y - frame.rect.Height / 2.0)) : Transform.Identity;
+            AnimedImage.RenderTransform = frame.HasOrigin ? new TranslateTransform(-((frame.origin.X - (frame.rect.Width / 2.0)) / ratio), -((frame.origin.Y - (frame.rect.Height / 2.0)) / ratio)) : Transform.Identity;
 
             OnPropertyChange(nameof(PlaySymbol));
 
@@ -475,8 +479,13 @@ namespace Animate
                 if (Frames.Count == 0 || spriteSheet == null) return;
 
                 var frame = Frames[currentFrameIndex];
+
+                var ratio = frame.rect.Width > frame.rect.Height ? (double)(frame.rect.Width / AnimatedContainer.Width) : (double)(frame.rect.Height / AnimatedContainer.Height);
+
+                AnimedImage.Width = frame.rect.Width / ratio;
+
                 AnimedImage.Source = frame.bitmap;
-                AnimedImage.RenderTransform = frame.HasOrigin ? new TranslateTransform(-(frame.origin.X - frame.rect.Width/2.0), -(frame.origin.Y - frame.rect.Height / 2.0)) : Transform.Identity;
+                AnimedImage.RenderTransform = frame.HasOrigin ? new TranslateTransform(-((frame.origin.X - (frame.rect.Width / 2.0)) / ratio), -((frame.origin.Y - (frame.rect.Height / 2.0)) / ratio)) : Transform.Identity;
 
                 currentFrameIndex = (currentFrameIndex + 1) % Frames.Count;
 
@@ -1065,7 +1074,7 @@ namespace Animate
 
                     for (int i = 0; i < Frames.Count; i++)
                     {
-                        string fileName = Path.Combine(folderPath, $"sprite_{i}.png");
+                        string fileName = Path.Combine(folderPath, $"{wnd.ImagePrefix}{i}.png");
 
                         var origin = Frames[i].origin;
 
@@ -1077,8 +1086,11 @@ namespace Animate
 
                         using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(final))
                         {
+                            var diffX = origin.X - (rect.Width / 2.0);
+                            var diffY = origin.Y - (rect.Height / 2.0);
+                            g.TranslateTransform((float)-diffX, (float)-diffY);
                             g.Clear(System.Drawing.Color.Transparent);
-                            g.DrawImage(cropped.ToBitmap(), (width / 2) - origin.X, (height / 2) - origin.Y);
+                            g.DrawImage(cropped.ToBitmap(), (int)((width / 2.0) - (rect.Width / 2.0)), (int)((height / 2.0) - (rect.Height / 2.0)));
                         }
 
                         // redimensionne (si besoin d'abaisser la résolution)
