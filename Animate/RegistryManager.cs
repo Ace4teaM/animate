@@ -137,6 +137,19 @@ namespace Animate
         }
 
         /// <summary>
+        /// Ajoute des caractères '=' en fin de chaine pour compléter une string de taille ^4
+        /// </summary>
+        public static string AddBase64Padding(string base64String)
+        {
+            int paddingLength = base64String.Length % 4;
+            if (paddingLength > 0)
+            {
+                base64String += new string('=', 4 - paddingLength);
+            }
+            return base64String;
+        }
+
+        /// <summary>
         /// Supprimer les entrées du registre pour les fichiers manquants
         /// </summary>
         public static void CleanupMissingFiles()
@@ -153,7 +166,7 @@ namespace Animate
                     {
                         try
                         {
-                            byte[] data = Convert.FromBase64String(valueName.Replace('_', '+').Replace('-', '/') + "==");
+                            byte[] data = Convert.FromBase64String(AddBase64Padding(valueName.Replace('_', '+').Replace('-', '/')));
                             string filePath = System.Text.Encoding.UTF8.GetString(data);
                             
                             if (!File.Exists(filePath))
@@ -161,7 +174,7 @@ namespace Animate
                                 keysToDelete.Add(valueName);
                             }
                         }
-                        catch
+                        catch(Exception ex)
                         {
                             keysToDelete.Add(valueName);
                         }
