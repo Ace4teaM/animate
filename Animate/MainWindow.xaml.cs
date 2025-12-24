@@ -1409,6 +1409,7 @@ namespace Animate
 
                     if (spriteSheet != null)
                     {
+                        frame.rect = Int32RectExtensions.Truncate(frame.rect, new Int32Rect(0, 0, spriteSheet.PixelWidth, spriteSheet.PixelHeight));
                         frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
                     }
 
