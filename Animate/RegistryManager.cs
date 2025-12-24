@@ -212,6 +212,8 @@ namespace Animate
 
     public class ExportSettings
     {
+        public string AlignmentHoriz { get; set; }
+        public string AlignmentVert { get; set; }
         public string ImagePrefix { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }

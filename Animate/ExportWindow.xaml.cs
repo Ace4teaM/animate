@@ -15,6 +15,8 @@ namespace Animate
         private int imageHeight;
         private int imageWidth;
 
+        public string AlignmentHoriz { get; set; } = "Center";
+        public string AlignmentVert { get; set; } = "Center";
         public string ImagePrefix { get; set; } = "sprite_";
         public int ImageHeight { get => imageHeight; set { imageHeight = value; ResolutionChange(); OnPropertyChange(nameof(AdjustedImageHeight)); } }
         public int ImageWidth { get => imageWidth; set { imageWidth = value; ResolutionChange(); OnPropertyChange(nameof(AdjustedImageWidth)); } }
@@ -63,6 +65,8 @@ namespace Animate
         {
             return new ExportSettings
             {
+                AlignmentHoriz = AlignmentHoriz,
+                AlignmentVert = AlignmentVert,
                 ImagePrefix = ImagePrefix,
                 ImageWidth = ImageWidth,
                 ImageHeight = ImageHeight,
@@ -75,6 +79,8 @@ namespace Animate
         {
             if (settings == null) return;
 
+            AlignmentHoriz = settings.AlignmentHoriz;
+            AlignmentVert = settings.AlignmentVert;
             ImagePrefix = settings.ImagePrefix;
             ImageWidth = settings.ImageWidth;
             ImageHeight = settings.ImageHeight;

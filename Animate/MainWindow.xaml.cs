@@ -1066,6 +1066,95 @@ namespace Animate
                 int height = wnd.AdjustSize == false ? wnd.ImageHeight : wnd.AdjustedImageHeight;
                 try
                 {
+                    Int32Rect[] dstRectFrames = new Int32Rect[Frames.Count];
+
+                    for (int i = 0; i < Frames.Count; i++)
+                    {
+                        var origin = Frames[i].origin;
+                        var rect = Frames[i].rect;
+
+                        // Centre le dessin dans l'image par rapport à son origine
+                        var diffX = origin.X - (rect.Width / 2.0);
+                        var diffY = origin.Y - (rect.Height / 2.0);
+                        var centerX = (int)((width / 2.0) - (rect.Width / 2.0));
+                        var centerY = (int)((height / 2.0) - (rect.Height / 2.0));
+
+                        dstRectFrames[i].X = centerX - (int)diffX;
+                        dstRectFrames[i].Y = centerY - (int)diffY;
+                        dstRectFrames[i].Width = rect.Width;
+                        dstRectFrames[i].Height = rect.Height;
+                    }
+
+                    // Aligne l'image si besoin
+                    // supprime la plus petite marge commune entre le bord de l'image et le dessin
+                    switch (wnd.AlignmentHoriz)
+                    {
+                        case "Center"://ne fait rien
+                            break;
+                        case "Left":
+                            {
+                                var minMargin = dstRectFrames.Select(p=>p.X).Min();
+                                var maxMargin = dstRectFrames.Select(p=>p.X).Max();
+
+                                if (maxMargin > minMargin)
+                                {
+                                    for (int i = 0; i < Frames.Count; i++)
+                                    {
+                                        dstRectFrames[i].X -= minMargin;
+                                    }
+                                }
+                            }
+                            break;
+                        case "Right":
+                            {
+                                var minMargin = dstRectFrames.Select(p => width - (p.X + p.Width)).Min();
+                                var maxMargin = dstRectFrames.Select(p => width - (p.X + p.Width)).Max();
+
+                                if (maxMargin > minMargin)
+                                {
+                                    for (int i = 0; i < Frames.Count; i++)
+                                    {
+                                        dstRectFrames[i].X += minMargin;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+
+                    switch (wnd.AlignmentVert)
+                    {
+                        case "Center"://ne fait rien
+                            break;
+                        case "Top":
+                            {
+                                var minMargin = dstRectFrames.Select(p => p.Y).Min();
+                                var maxMargin = dstRectFrames.Select(p => p.Y).Max();
+
+                                if (maxMargin > minMargin)
+                                {
+                                    for (int i = 0; i < Frames.Count; i++)
+                                    {
+                                        dstRectFrames[i].Y -= minMargin;
+                                    }
+                                }
+                            }
+                            break;
+                        case "Bottom":
+                            {
+                                var minMargin = dstRectFrames.Select(p => height - (p.Y + p.Height)).Min();
+                                var maxMargin = dstRectFrames.Select(p => height - (p.Y + p.Height)).Max();
+
+                                if (maxMargin > minMargin)
+                                {
+                                    for (int i = 0; i < Frames.Count; i++)
+                                    {
+                                        dstRectFrames[i].Y += minMargin;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+
                     var folderPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
                     if (Directory.Exists(folderPath))
                         Directory.Delete(folderPath, true);
@@ -1079,9 +1168,10 @@ namespace Animate
                         var origin = Frames[i].origin;
 
                         var rect = Frames[i].rect;
+                        var dstrect = dstRectFrames[i];
                         var cropped = Frames[i].bitmap;
 
-                        // copie l'image dans une image vierge adapté aux proportions finales (texture)
+                        // copie l'image dans une image vierge adaptée aux proportions finales (texture)
                         var final = new System.Drawing.Bitmap(width, height);
                         final.SetResolution(96, 96);
 
@@ -1091,13 +1181,11 @@ namespace Animate
                             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
                             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 
-                            var diffX = origin.X - (rect.Width / 2.0);
-                            var diffY = origin.Y - (rect.Height / 2.0);
-                            g.TranslateTransform((float)-diffX, (float)-diffY);
+                            // Centre le dessin dans l'image par rapport à son origine
                             g.Clear(System.Drawing.Color.Transparent);
                             var bmp = cropped.ToBitmap();
                             bmp.SetResolution(96, 96);
-                            g.DrawImage(bmp, (int)((width / 2.0) - (rect.Width / 2.0)), (int)((height / 2.0) - (rect.Height / 2.0)));
+                            g.DrawImage(bmp, dstrect.X, dstrect.Y);
                         }
 
                         // redimensionne (si besoin d'abaisser la résolution)

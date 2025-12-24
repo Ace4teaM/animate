@@ -44,6 +44,22 @@
             </TextBlock>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center" Text="Alignement Horizontal" Width="120"></TextBlock>
+            <ComboBox SelectedValue="{Binding AlignmentHoriz}" SelectedValuePath="Content" Width="110">
+                <ComboBoxItem IsSelected="True">Center</ComboBoxItem>
+                <ComboBoxItem>Left</ComboBoxItem>
+                <ComboBoxItem>Right</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center" Text="Alignement Vertical" Width="120"></TextBlock>
+            <ComboBox SelectedValue="{Binding AlignmentVert}" SelectedValuePath="Content" Width="110">
+                <ComboBoxItem IsSelected="True">Center</ComboBoxItem>
+                <ComboBoxItem>Top</ComboBoxItem>
+                <ComboBoxItem>Bottom</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
             <TextBlock VerticalAlignment="Center" Text="Prefixe" Width="120"></TextBlock>
             <TextBox VerticalAlignment="Center" Text="{Binding ImagePrefix}" Width="110"></TextBox>
         </StackPanel>
