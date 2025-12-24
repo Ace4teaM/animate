@@ -1096,7 +1096,7 @@ namespace Animate
                                 var minMargin = dstRectFrames.Select(p=>p.X).Min();
                                 var maxMargin = dstRectFrames.Select(p=>p.X).Max();
 
-                                if (maxMargin > minMargin)
+                                if (maxMargin > minMargin || Frames.Count == 1)
                                 {
                                     for (int i = 0; i < Frames.Count; i++)
                                     {
@@ -1110,7 +1110,7 @@ namespace Animate
                                 var minMargin = dstRectFrames.Select(p => width - (p.X + p.Width)).Min();
                                 var maxMargin = dstRectFrames.Select(p => width - (p.X + p.Width)).Max();
 
-                                if (maxMargin > minMargin)
+                                if (maxMargin > minMargin || Frames.Count == 1)
                                 {
                                     for (int i = 0; i < Frames.Count; i++)
                                     {
@@ -1130,7 +1130,7 @@ namespace Animate
                                 var minMargin = dstRectFrames.Select(p => p.Y).Min();
                                 var maxMargin = dstRectFrames.Select(p => p.Y).Max();
 
-                                if (maxMargin > minMargin)
+                                if (maxMargin > minMargin || Frames.Count == 1)
                                 {
                                     for (int i = 0; i < Frames.Count; i++)
                                     {
@@ -1144,7 +1144,7 @@ namespace Animate
                                 var minMargin = dstRectFrames.Select(p => height - (p.Y + p.Height)).Min();
                                 var maxMargin = dstRectFrames.Select(p => height - (p.Y + p.Height)).Max();
 
-                                if (maxMargin > minMargin)
+                                if (maxMargin > minMargin || Frames.Count == 1)
                                 {
                                     for (int i = 0; i < Frames.Count; i++)
                                     {
