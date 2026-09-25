@@ -77,6 +77,9 @@ namespace Animate
         public ObservableCollection<Frame> Frames { get; } = [];
         private System.Windows.Point startPoint;
         private System.Windows.Shapes.Rectangle? selectionRect;
+        private Frame? selectedFrame;
+        private bool isResizing = false;
+        private ResizeHandle activeResizeHandle = ResizeHandle.None;
 
         /// <summary>
         /// Action du curseur = Pointe une position
@@ -96,6 +99,22 @@ namespace Animate
         private int currentFrameIndex = 0;
         private DispatcherTimer? animationTimer;
         private DispatcherTimer? reloadTimer;
+
+        private const int MinFrameSize = 6;
+        private const double ResizeHandleSize = 8;
+
+        private enum ResizeHandle
+        {
+            None,
+            TopLeft,
+            Top,
+            TopRight,
+            Right,
+            BottomRight,
+            Bottom,
+            BottomLeft,
+            Left
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -180,11 +199,18 @@ namespace Animate
             set
             {
                 if (value == null)
+                {
                     currentFrameIndex = 0;
+                    selectedFrame = null;
+                }
                 else
+                {
                     currentFrameIndex = Frames.IndexOf(value);
+                    selectedFrame = value;
+                }
 
                 SetFrame(currentFrameIndex);
+                RefreshFrameOverlay();
             }
         }
 
@@ -394,10 +420,14 @@ namespace Animate
                 if (frame.HasOrigin == false)
                     continue;
 
+                var isSelectedFrame = frame == selectedFrame;
+                var stroke = isSelectedFrame ? Brushes.DodgerBlue : Brushes.Red;
+                var strokeThickness = isSelectedFrame ? 3 : 2;
+
                 var rect = new System.Windows.Shapes.Rectangle
                 {
-                    Stroke = Brushes.Red,
-                    StrokeThickness = 2,
+                    Stroke = stroke,
+                    StrokeThickness = strokeThickness,
                     StrokeDashArray = [2],
                     Width = frame.rect.Width,
                     Height = frame.rect.Height,
@@ -409,7 +439,7 @@ namespace Animate
 
                 var origin = new System.Windows.Shapes.Ellipse
                 {
-                    Stroke = Brushes.Red,
+                    Stroke = stroke,
                     StrokeThickness = 2,
                     StrokeDashArray = [2],
                     Width = 7,
@@ -420,6 +450,26 @@ namespace Animate
                 Canvas.SetLeft(origin, frame.rect.X + frame.origin.X);
                 Canvas.SetTop(origin, frame.rect.Y + frame.origin.Y);
                 ImageCanvas.Children.Add(origin);
+
+                if (isSelectedFrame)
+                {
+                    foreach (var point in GetResizeHandlePoints(frame.rect))
+                    {
+                        var handle = new System.Windows.Shapes.Rectangle
+                        {
+                            Stroke = Brushes.DodgerBlue,
+                            Fill = Brushes.White,
+                            StrokeThickness = 1.5,
+                            Width = ResizeHandleSize,
+                            Height = ResizeHandleSize,
+                            Tag = frame
+                        };
+
+                        Canvas.SetLeft(handle, point.X - (ResizeHandleSize / 2.0));
+                        Canvas.SetTop(handle, point.Y - (ResizeHandleSize / 2.0));
+                        ImageCanvas.Children.Add(handle);
+                    }
+                }
             }
         }
         /*
@@ -466,6 +516,145 @@ namespace Animate
                     ImageCanvas.Children.Remove(child);
                 }
             }
+        }
+
+        private void RefreshFrameOverlay()
+        {
+            ShowOrigins(Frames);
+        }
+
+        private IEnumerable<System.Windows.Point> GetResizeHandlePoints(Int32Rect rect)
+        {
+            double left = rect.X;
+            double top = rect.Y;
+            double right = rect.X + rect.Width;
+            double bottom = rect.Y + rect.Height;
+            double centerX = rect.X + (rect.Width / 2.0);
+            double centerY = rect.Y + (rect.Height / 2.0);
+
+            return
+            [
+                new System.Windows.Point(left, top),
+                new System.Windows.Point(centerX, top),
+                new System.Windows.Point(right, top),
+                new System.Windows.Point(right, centerY),
+                new System.Windows.Point(right, bottom),
+                new System.Windows.Point(centerX, bottom),
+                new System.Windows.Point(left, bottom),
+                new System.Windows.Point(left, centerY)
+            ];
+        }
+
+        private ResizeHandle HitTestResizeHandle(Frame frame, System.Windows.Point point)
+        {
+            double left = frame.rect.X;
+            double top = frame.rect.Y;
+            double right = frame.rect.X + frame.rect.Width;
+            double bottom = frame.rect.Y + frame.rect.Height;
+            double centerX = frame.rect.X + (frame.rect.Width / 2.0);
+            double centerY = frame.rect.Y + (frame.rect.Height / 2.0);
+            double threshold = ResizeHandleSize;
+
+            if (Math.Abs(point.X - left) <= threshold && Math.Abs(point.Y - top) <= threshold)
+                return ResizeHandle.TopLeft;
+            if (Math.Abs(point.X - centerX) <= threshold && Math.Abs(point.Y - top) <= threshold)
+                return ResizeHandle.Top;
+            if (Math.Abs(point.X - right) <= threshold && Math.Abs(point.Y - top) <= threshold)
+                return ResizeHandle.TopRight;
+            if (Math.Abs(point.X - right) <= threshold && Math.Abs(point.Y - centerY) <= threshold)
+                return ResizeHandle.Right;
+            if (Math.Abs(point.X - right) <= threshold && Math.Abs(point.Y - bottom) <= threshold)
+                return ResizeHandle.BottomRight;
+            if (Math.Abs(point.X - centerX) <= threshold && Math.Abs(point.Y - bottom) <= threshold)
+                return ResizeHandle.Bottom;
+            if (Math.Abs(point.X - left) <= threshold && Math.Abs(point.Y - bottom) <= threshold)
+                return ResizeHandle.BottomLeft;
+            if (Math.Abs(point.X - left) <= threshold && Math.Abs(point.Y - centerY) <= threshold)
+                return ResizeHandle.Left;
+
+            return ResizeHandle.None;
+        }
+
+        private Int32Rect ComputeResizedRect(Int32Rect rect, ResizeHandle handle, System.Windows.Point mousePoint)
+        {
+            int left = rect.X;
+            int top = rect.Y;
+            int right = rect.X + rect.Width;
+            int bottom = rect.Y + rect.Height;
+            int mouseX = (int)mousePoint.X;
+            int mouseY = (int)mousePoint.Y;
+
+            switch (handle)
+            {
+                case ResizeHandle.TopLeft:
+                    left = mouseX;
+                    top = mouseY;
+                    break;
+                case ResizeHandle.Top:
+                    top = mouseY;
+                    break;
+                case ResizeHandle.TopRight:
+                    right = mouseX;
+                    top = mouseY;
+                    break;
+                case ResizeHandle.Right:
+                    right = mouseX;
+                    break;
+                case ResizeHandle.BottomRight:
+                    right = mouseX;
+                    bottom = mouseY;
+                    break;
+                case ResizeHandle.Bottom:
+                    bottom = mouseY;
+                    break;
+                case ResizeHandle.BottomLeft:
+                    left = mouseX;
+                    bottom = mouseY;
+                    break;
+                case ResizeHandle.Left:
+                    left = mouseX;
+                    break;
+            }
+
+            if (spriteSheet == null)
+                return rect;
+
+            int minX = 0;
+            int minY = 0;
+            int maxX = spriteSheet.PixelWidth;
+            int maxY = spriteSheet.PixelHeight;
+
+            left = Math.Clamp(left, minX, maxX - MinFrameSize);
+            top = Math.Clamp(top, minY, maxY - MinFrameSize);
+            right = Math.Clamp(right, minX + MinFrameSize, maxX);
+            bottom = Math.Clamp(bottom, minY + MinFrameSize, maxY);
+
+            if (right - left < MinFrameSize)
+            {
+                if (handle == ResizeHandle.Left || handle == ResizeHandle.TopLeft || handle == ResizeHandle.BottomLeft)
+                    left = right - MinFrameSize;
+                else
+                    right = left + MinFrameSize;
+            }
+
+            if (bottom - top < MinFrameSize)
+            {
+                if (handle == ResizeHandle.Top || handle == ResizeHandle.TopLeft || handle == ResizeHandle.TopRight)
+                    top = bottom - MinFrameSize;
+                else
+                    bottom = top + MinFrameSize;
+            }
+
+            return new Int32Rect(left, top, right - left, bottom - top);
+        }
+
+        private void RebuildFrameBitmap(Frame frame)
+        {
+            if (spriteSheet == null)
+                return;
+
+            frame.rect = Int32RectExtensions.Truncate(frame.rect, new Int32Rect(0, 0, spriteSheet.PixelWidth, spriteSheet.PixelHeight));
+            frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
         }
 
         private void SetupAnimationTimer()
@@ -669,8 +858,32 @@ namespace Animate
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
+                var mousePos = e.GetPosition(ImageCanvas);
+                if (selectedFrame != null)
+                {
+                    activeResizeHandle = HitTestResizeHandle(selectedFrame, mousePos);
+                    if (activeResizeHandle != ResizeHandle.None)
+                    {
+                        isResizing = true;
+                        MainImage.CaptureMouse();
+                        e.Handled = true;
+                        return;
+                    }
+                }
+
+                var clickedFrame = Frames.LastOrDefault(p => p.rect.Contains(mousePos));
+                if (clickedFrame != null)
+                {
+                    frameList.SelectedItem = clickedFrame;
+                    e.Handled = true;
+                    return;
+                }
+
                 isDrawing = true;
-                startPoint = e.GetPosition(ImageCanvas);
+                startPoint = mousePos;
+                selectedFrame = null;
+                activeResizeHandle = ResizeHandle.None;
+                RefreshFrameOverlay();
 
                 selectionRect = new System.Windows.Shapes.Rectangle
                 {
@@ -714,7 +927,23 @@ namespace Animate
         {
             OnPropertyChange(nameof(MousePosition));
 
-            if (isDrawing && selectionRect != null)
+            if (isResizing && selectedFrame != null && activeResizeHandle != ResizeHandle.None)
+            {
+                var pos = e.GetPosition(ImageCanvas);
+                var oldRect = selectedFrame.rect;
+                var oldOrigin = selectedFrame.origin;
+                selectedFrame.rect = ComputeResizedRect(oldRect, activeResizeHandle, pos);
+                if (selectedFrame.HasOrigin)
+                {
+                    var originX = (float)Math.Clamp((oldRect.X + oldOrigin.X) - selectedFrame.rect.X, 0, selectedFrame.rect.Width);
+                    var originY = (float)Math.Clamp((oldRect.Y + oldOrigin.Y) - selectedFrame.rect.Y, 0, selectedFrame.rect.Height);
+                    selectedFrame.origin = new Vector2(originX, originY);
+                }
+                RebuildFrameBitmap(selectedFrame);
+                RefreshFrameOverlay();
+                SetFrame(Frames.IndexOf(selectedFrame));
+            }
+            else if (isDrawing && selectionRect != null)
             {
                 Point pos = e.GetPosition(ImageCanvas);
 
@@ -749,7 +978,20 @@ namespace Animate
 
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (isDrawing)
+            if (isResizing)
+            {
+                isResizing = false;
+                activeResizeHandle = ResizeHandle.None;
+                if (selectedFrame != null)
+                {
+                    RebuildFrameBitmap(selectedFrame);
+                    RefreshFrameOverlay();
+                    SetFrame(Frames.IndexOf(selectedFrame));
+                    OnFramesChanged();
+                }
+                MainImage.ReleaseMouseCapture();
+            }
+            else if (isDrawing)
             {
                 isDrawing = false;
                 Point endPoint = e.GetPosition(ImageCanvas);
@@ -781,13 +1023,16 @@ namespace Animate
                         }
 
                         frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
-
-                        ShowOrigins([frame]);
+                        frameList.SelectedItem = frame;
                         OnFramesChanged();
                     }
                 }
 
-                ImageCanvas.Children.Remove(selectionRect);
+                if (selectionRect != null)
+                {
+                    ImageCanvas.Children.Remove(selectionRect);
+                    selectionRect = null;
+                }
                 MainImage.ReleaseMouseCapture();
             }
             else if (isPanning)
@@ -803,8 +1048,7 @@ namespace Animate
                 if(frame != null)
                 {
                     frame.origin = new Vector2((float)(pos.X - frame.rect.X), (float)(pos.Y - frame.rect.Y));
-                    ShowOrigins([frame]);
-                    SetFrame(Frames.IndexOf(frame));
+                    frameList.SelectedItem = frame;
                     OnFramesChanged();
                 }
                 MainImage.ReleaseMouseCapture();
@@ -824,6 +1068,9 @@ namespace Animate
         {
             Frames.Clear();
             currentFrameIndex = 0;
+            selectedFrame = null;
+            activeResizeHandle = ResizeHandle.None;
+            isResizing = false;
 
             // Efface tous les rectangles sauf l'image
             foreach (var child in ImageCanvas.Children.OfType<FrameworkElement>().Where(p => p.Tag is Frame).ToArray())
@@ -838,7 +1085,10 @@ namespace Animate
             currentFrameIndex = 0;
             foreach (var frame in _frames)
                 Frames.Remove(frame);
+            if (selectedFrame != null && _frames.Contains(selectedFrame))
+                selectedFrame = null;
             HideOrigins(_frames);
+            RefreshFrameOverlay();
             OnFramesChanged();
         }
 
