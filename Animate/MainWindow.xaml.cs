@@ -874,9 +874,7 @@ namespace Animate
                 var clickedFrame = Frames.LastOrDefault(p => p.rect.Contains(mousePos));
                 if (clickedFrame != null)
                 {
-                    selectedFrame = clickedFrame;
                     frameList.SelectedItem = clickedFrame;
-                    RefreshFrameOverlay();
                     e.Handled = true;
                     return;
                 }
@@ -1025,9 +1023,7 @@ namespace Animate
                         }
 
                         frame.bitmap = new CroppedBitmap(spriteSheet, frame.rect);
-                        selectedFrame = frame;
                         frameList.SelectedItem = frame;
-                        RefreshFrameOverlay();
                         OnFramesChanged();
                     }
                 }
@@ -1052,10 +1048,7 @@ namespace Animate
                 if(frame != null)
                 {
                     frame.origin = new Vector2((float)(pos.X - frame.rect.X), (float)(pos.Y - frame.rect.Y));
-                    selectedFrame = frame;
                     frameList.SelectedItem = frame;
-                    RefreshFrameOverlay();
-                    SetFrame(Frames.IndexOf(frame));
                     OnFramesChanged();
                 }
                 MainImage.ReleaseMouseCapture();
