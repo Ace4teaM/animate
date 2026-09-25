@@ -1092,6 +1092,7 @@ namespace Animate
             if (selectedFrame != null && _frames.Contains(selectedFrame))
                 selectedFrame = null;
             HideOrigins(_frames);
+            RefreshFrameOverlay();
             OnFramesChanged();
         }
 
