@@ -1033,7 +1033,10 @@ namespace Animate
                 }
 
                 if (selectionRect != null)
+                {
                     ImageCanvas.Children.Remove(selectionRect);
+                    selectionRect = null;
+                }
                 MainImage.ReleaseMouseCapture();
             }
             else if (isPanning)
