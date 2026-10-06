@@ -1,17 +1,17 @@
 # Animate!
 [Read Me (English)](README.md)
 
-Animate! est un outil qui permet d'animer vos dessins à l'écran à partir d'un fichier image.
+Animate! est un outil conçu pour animer facilement des dessins à partir d’un simple fichier image.
 
-Pas de prise de tête avec une interface complexe et des tonnes de fonctionnalités, le but est de vous permettre de visualiser au plus vite vos animations puis d'exporter les images recadrées et sans arrière plan.
+L’objectif est de rester **simple et efficace** : pas d’interface complexe ni de fonctionnalités superflues. Animate! permet de visualiser rapidement une animation que vous êtes en train de dessiner, puis d’exporter les images recadrées et débarrassées de leur arrière-plan.
 
 ![](sample.gif)
 
-L'UI vous permet de choisir chaque zones du dessin puis l'ajoute en fil d'animation. Le cadre est automatiquement ajusté et toutes les modifications du fichier sont détectées vous laissant libre de vous concentrer sur le dessin.
+L’interface permet de sélectionner directement les différentes zones du dessin et de les ajouter à la séquence d’animation. Le cadrage est automatiquement ajusté et les modifications que vous apportez au fichier source sont immédiatement répercuté à l'écran sans rechargement manuelle.
 
-Animate! est compatible avec les fichiers BMP, JPG ou PNG.
+**Animate!** prend en charge les formats BMP, JPG et PNG.
 
-La fonction **Export** permet de préparer les sprites avec une taille fixe et sans fond pour importer dans vos projets de développement (ex: Unity).
+La fonction **Export** permet de préparer les sprites pour leur intégration dans un projet de développement, en leur appliquant une taille fixe et en supprimant leur arrière-plan. Les images obtenues peuvent ainsi être directement utilisées dans des environnements tels que Unity.
 
 ## Thème UI
 
